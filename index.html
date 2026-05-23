@@ -33,7 +33,6 @@
             position: relative;
         }
 
-        /* ⏳ شاشة التحميل النيون */
         #loader-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -64,7 +63,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 🌋 الهيدر */
         header {
             background: linear-gradient(180deg, #0f1424 0%, #080b14 100%);
             border-bottom: 2px solid var(--panel-border);
@@ -118,7 +116,6 @@
             box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
         }
 
-        /* 🏰 الحاوية الرئيسية */
         .main-container {
             max-width: 1400px;
             margin: 40px auto;
@@ -154,7 +151,6 @@
             text-shadow: 0 0 5px rgba(0,255,102,0.2);
         }
 
-        /* لوحة الفلاتر والبحث */
         .control-bar {
             background-color: var(--panel-bg);
             border: 1px solid var(--panel-border);
@@ -256,7 +252,6 @@
             box-shadow: 0 0 12px var(--neon-blue);
         }
 
-        /* 🎴 كروت الألعاب */
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -284,4 +279,369 @@
             width: 100%; height: 170px;
             background-color: #080b14;
         }
-        .card-thumbnail img { width: 100%; height: 100%; object-fit: cover
+        .card-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+
+        .badge-free {
+            position: absolute; top: 12px; right: 12px;
+            background: linear-gradient(90deg, #00b446, #00ff66);
+            color: #000; font-size: 12px; font-weight: 900;
+            padding: 4px 12px; border-radius: 4px;
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+        .badge-original-price {
+            position: absolute; top: 12px; left: 12px;
+            background-color: rgba(0,0,0,0.85);
+            color: #fbbf24; font-size: 11px; font-weight: bold;
+            padding: 4px 8px; border-radius: 4px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .card-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            gap: 12px;
+        }
+        .card-title {
+            font-size: 16px; font-weight: 700; color: #fff;
+            height: 44px; overflow: hidden; line-height: 1.4;
+        }
+        .card-meta-tags { display: flex; gap: 6px; }
+        .meta-tag {
+            background-color: #1e293b; color: #94a3b8;
+            font-size: 12px; padding: 4px 10px; border-radius: 4px;
+        }
+
+        .card-footer {
+            margin-top: auto; padding-top: 14px;
+            border-top: 1px solid var(--panel-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .countdown-bar {
+            background-color: rgba(255, 0, 85, 0.08);
+            color: var(--neon-magenta); border: 1px solid rgba(255, 0, 85, 0.15);
+            font-size: 12px; padding: 4px 10px; border-radius: 4px; font-weight: bold;
+        }
+
+        .steam-redirect-btn {
+            background-color: #1e293b; border: 1px solid var(--panel-border);
+            color: #ffffff; padding: 8px 16px; border-radius: 6px;
+            font-size: 13px; text-decoration: none; font-weight: bold;
+            transition: all 0.2s;
+        }
+        .steam-redirect-btn:hover {
+            background-color: var(--neon-blue); color: #000;
+            border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .click-pulse {
+            position: absolute; border-radius: 50%;
+            background: rgba(0, 240, 255, 0.4);
+            transform: scale(0); animation: pulse-effect 0.4s linear;
+            pointer-events: none; z-index: 9999;
+        }
+        @keyframes pulse-effect { to { transform: scale(2.5); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="loader-screen">
+        <div class="spinner-neon"></div>
+        <div class="load-text" id="loader-percentage">VOLCANX HYPER LINK LOADING...</div>
+    </div>
+
+    <header>
+        <div class="header-right">
+            <div class="header-utility">
+                <button class="util-btn active-lang" id="lang-ar" onclick="setAppLanguage('ar')">العربية</button>
+                <button class="util-btn" id="lang-en" onclick="setAppLanguage('en')">English</button>
+                <button class="util-btn" id="lang-fr" onclick="setAppLanguage('fr')">Français</button>
+                <button class="util-btn" id="sound-btn" onclick="toggleAudioMute()">🔊 Audio: ON</button>
+            </div>
+        </div>
+
+        <div class="brand-zone">
+            <div class="brand-name">Volcan<span>X</span></div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="intro-section">
+            <div class="main-title" id="interface-title">الألعاب المجانية المحدودة</div>
+            <div class="api-credit" id="live-data-counter">SYNCING SYSTEM DATA...</div>
+        </div>
+
+        <div class="control-bar">
+            <div class="filter-row">
+                <button class="btn-refresh" onclick="forceReloadSystemData()" id="txt-refresh">تحديث المنصة 🔄</button>
+                <div class="sort-group">
+                    <button class="sort-btn active" id="sort-new" onclick="applyDataSorting('new')">الأحدث</button>
+                    <button class="sort-btn" id="sort-pop" onclick="applyDataSorting('pop')">الشعبية</button>
+                    <button class="sort-btn" id="sort-val" onclick="applyDataSorting('val')">الأعلى قيمة</button>
+                </div>
+                <input type="text" id="system-search" class="search-box" placeholder="ابحث هنا عن الألعاب والعروض..." oninput="refreshDisplayRender()">
+            </div>
+            <div class="tags-container" id="filter-tags-row"></div>
+        </div>
+
+        <div id="dynamic-render-viewport"></div>
+    </div>
+
+    <script>
+        let currentActiveSort = 'new';
+        let currentSelectedTag = 'الكل';
+        let systemLanguage = 'ar';
+        let isSystemAudioOn = true;
+        let freeGamesDatabase = [];
+
+        let audioCtx = null;
+        function initAudioContext() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playElectronicSound(freq, duration, type = 'sine') {
+            if (!isSystemAudioOn) return;
+            try {
+                initAudioContext();
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        const dictionary = {
+            ar: {
+                freeTitle: "الألعاب المجانية المحدودة",
+                refresh: "تحديث المنصة 🔄", searchPlaceholder: "ابحث هنا عن الألعاب الحالية...",
+                latest: "الأحدث", popular: "الشعبية", value: "الأعلى قيمة", freeBadge: "مجاني", get: "احصل عليها ←",
+                syncing: "جاري جلب البيانات الحية من الخوادم العالمية...", counts: "يعرض الآن {n} عرض مجاني نشط ومتزامن بالكامل",
+                allTag: "الكل"
+            },
+            en: {
+                freeTitle: "Limited Free Giveaways",
+                refresh: "Refresh Hub 🔄", searchPlaceholder: "Search for active drops...",
+                latest: "Latest", popular: "Popular", value: "Top Value", freeBadge: "FREE", get: "Claim Now ←",
+                syncing: "Fetching latest live promo deals...", counts: "Displaying {n} verified live free games",
+                allTag: "All"
+            },
+            fr: {
+                freeTitle: "Jeux Gratuits Limités",
+                refresh: "Actualiser 🔄", searchPlaceholder: "Rechercher des jeux gratuits...",
+                latest: "Récent", popular: "Populaire", value: "Top Valeur", freeBadge: "GRATUIT", get: "Obtenir ←",
+                syncing: "Chargement des promotions en cours...", counts: "{n} offres gratuites actives affichées",
+                allTag: "Tout"
+            }
+        };
+
+        document.addEventListener('click', function(e) {
+            playElectronicSound(130, 0.08, 'square');
+            let pulse = document.createElement('div');
+            pulse.className = 'click-pulse';
+            pulse.style.left = `${e.clientX - 10}px`;
+            pulse.style.top = `${e.clientY - 10}px`;
+            document.body.appendChild(pulse);
+            setTimeout(() => pulse.remove(), 400);
+        });
+
+        function setupHoverSounds() {
+            document.querySelectorAll('button, .platform-tag, .steam-redirect-btn').forEach(elem => {
+                elem.onmouseenter = () => playElectronicSound(750, 0.02, 'sine');
+            });
+        }
+
+        function toggleAudioMute() {
+            isSystemAudioOn = !isSystemAudioOn;
+            document.getElementById('sound-btn').innerText = isSystemAudioOn ? "🔊 Audio: ON" : "🔇 Audio: OFF";
+        }
+
+        function setAppLanguage(lang) {
+            systemLanguage = lang;
+            document.querySelectorAll('.util-btn').forEach(b => b.classList.remove('active-lang'));
+            document.getElementById(`lang-${lang}`).classList.add('active-lang');
+            document.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+            
+            document.getElementById('interface-title').innerText = dictionary[lang].freeTitle;
+            document.getElementById('txt-refresh').innerText = dictionary[lang].refresh;
+            document.getElementById('system-search').placeholder = dictionary[lang].searchPlaceholder;
+            document.getElementById('sort-new').innerText = dictionary[lang].latest;
+            document.getElementById('sort-pop').innerText = dictionary[lang].popular;
+            document.getElementById('sort-val').innerText = dictionary[lang].value;
+
+            buildInteractiveTags();
+            refreshDisplayRender();
+        }
+
+        function runLoadingSequence(callback) {
+            const screen = document.getElementById('loader-screen');
+            const percentText = document.getElementById('loader-percentage');
+            screen.style.opacity = '1'; screen.style.visibility = 'visible';
+            let progress = 0;
+            let interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 12) + 6;
+                if(progress >= 100) {
+                    progress = 100; clearInterval(interval);
+                    setTimeout(() => {
+                        screen.style.opacity = '0'; screen.style.visibility = 'hidden';
+                        if(callback) callback();
+                    }, 300);
+                }
+                percentText.innerText = `VOLCANX LOADING SYSTEM... ${progress}%`;
+            }, 25);
+        }
+
+        async function forceReloadSystemData() {
+            document.getElementById('live-data-counter').innerText = dictionary[systemLanguage].syncing;
+            
+            try {
+                // ⚡ تم استخدام بروكسي مباشر بدون كاش لضمان جلب العروض الجديدة فوراً عند تحديث الصفحة
+                let cacheBuster = Math.random() + "_" + new Date().getTime();
+                let proxyUrl = 'https://corsproxy.io/?';
+                let targetUrl = `https://www.gamerpower.com/api/giveaways?nocache=${cacheBuster}`;
+                
+                let res = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+                if(res.ok) {
+                    let rawFree = await res.json();
+                    
+                    if(rawFree && rawFree.length > 0) {
+                        let mappedFree = rawFree.map(item => ({
+                            id: item.id,
+                            title: item.title,
+                            platforms: item.platforms,
+                            image: item.image,
+                            worth: item.worth,
+                            worthNum: parseFloat(item.worth.replace('$', '')) || 0,
+                            popularity: parseInt(item.users) || 0,
+                            endDate: systemLanguage === 'ar' ? "لفترة محدودة ⏰" : "Limited Time ⏰",
+                            url: item.open_giveaway_url
+                        }));
+
+                        freeGamesDatabase = mappedFree.filter((game, index, self) =>
+                            index === self.findIndex((g) => g.title.toLowerCase().trim() === game.title.toLowerCase().trim())
+                        );
+                    }
+                }
+            } catch(e) { 
+                console.log("Network error fetching live drops."); 
+            }
+
+            buildInteractiveTags();
+            refreshDisplayRender();
+            setupHoverSounds();
+        }
+
+        function applyDataSorting(rule) {
+            currentActiveSort = rule;
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`sort-${rule}`).classList.add('active');
+            refreshDisplayRender();
+        }
+
+        function buildInteractiveTags() {
+            const container = document.getElementById('filter-tags-row');
+            container.innerHTML = '';
+            const pool = ['الكل', 'Steam', 'Epic', 'PC', 'iOS', 'Android'];
+
+            pool.forEach(tag => {
+                let count = 0;
+                if(tag === 'الكل') {
+                    count = freeGamesDatabase.length;
+                } else {
+                    count = freeGamesDatabase.filter(g => (g.title + g.platforms).toLowerCase().includes(tag.toLowerCase())).length;
+                }
+
+                const btn = document.createElement('button');
+                btn.className = `platform-tag ${tag === currentSelectedTag ? 'active' : ''}`;
+                btn.innerText = `${tag === 'الكل' ? dictionary[systemLanguage].allTag : tag} (${count})`;
+                btn.onclick = () => {
+                    currentSelectedTag = tag;
+                    buildInteractiveTags();
+                    refreshDisplayRender();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function refreshDisplayRender() {
+            const viewport = document.getElementById('dynamic-render-viewport');
+            viewport.innerHTML = '';
+            const query = document.getElementById('system-search').value.toLowerCase();
+            let data = [...freeGamesDatabase];
+
+            if (currentSelectedTag !== 'الكل') {
+                data = data.filter(g => (g.title + g.platforms).toLowerCase().includes(currentSelectedTag.toLowerCase()));
+            }
+            if (query) {
+                data = data.filter(g => g.title.toLowerCase().includes(query) || g.platforms.toLowerCase().includes(query));
+            }
+
+            if (currentActiveSort === 'new') {
+                data.sort((a, b) => b.id - a.id);
+            } else if (currentActiveSort === 'pop') {
+                data.sort((a, b) => b.popularity - a.popularity);
+            } else if (currentActiveSort === 'val') {
+                data.sort((a, b) => b.worthNum - a.worthNum);
+            }
+
+            let countTxt = dictionary[systemLanguage].counts.replace('{n}', data.length);
+            document.getElementById('live-data-counter').innerText = countTxt;
+
+            if (data.length === 0) {
+                viewport.innerHTML = `<div style="text-align:center; padding:50px; color:#64748b;">لا توجد نتائج مطابقة للفلاتر الحالية أو جاري جلب البيانات...</div>`;
+                return;
+            }
+
+            const grid = document.createElement('div');
+            grid.className = 'games-grid';
+
+            data.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                
+                let badgeMarkup = `
+                    <span class="badge-free">${dictionary[systemLanguage].freeBadge}</span>
+                    <span class="badge-original-price">${game.worth}</span>
+                `;
+
+                let footerMarkup = `
+                    <span class="countdown-bar">${game.endDate}</span>
+                    <a href="${game.url || '#'}" target="_blank" class="steam-redirect-btn">${dictionary[systemLanguage].get}</a>
+                `;
+
+                card.innerHTML = `
+                    <div class="card-thumbnail">
+                        ${badgeMarkup}
+                        <img src="${game.image}" alt="${game.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%231e293b\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>'">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${game.title}</div>
+                        <div class="card-meta-tags">
+                            <span class="meta-tag">${game.platforms}</span>
+                        </div>
+                        <div class="card-footer">
+                            ${footerMarkup}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            viewport.appendChild(grid);
+            setupHoverSounds();
+        }
+
+        window.onload = () => {
+            runLoadingSequence(() => {
+                forceReloadSystemData();
+            });
+        };
+    </script>
+</body>
+</html>
