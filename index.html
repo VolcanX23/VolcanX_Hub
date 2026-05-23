@@ -501,14 +501,14 @@
             document.getElementById('live-data-counter').innerText = dictionary[systemLanguage].syncing;
             
             try {
-                // ⚡ تم استخدام بروكسي مباشر بدون كاش لضمان جلب العروض الجديدة فوراً عند تحديث الصفحة
-                let cacheBuster = Math.random() + "_" + new Date().getTime();
-                let proxyUrl = 'https://corsproxy.io/?';
-                let targetUrl = `https://www.gamerpower.com/api/giveaways?nocache=${cacheBuster}`;
+                let cacheBuster = new Date().getTime();
+                let targetUrl = `https://www.gamerpower.com/api/giveaways?cb=${cacheBuster}`;
+                let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
                 
-                let res = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+                let res = await fetch(proxyUrl);
                 if(res.ok) {
-                    let rawFree = await res.json();
+                    let container = await res.json();
+                    let rawFree = JSON.parse(container.contents);
                     
                     if(rawFree && rawFree.length > 0) {
                         let mappedFree = rawFree.map(item => ({
@@ -529,7 +529,7 @@
                     }
                 }
             } catch(e) { 
-                console.log("Network error fetching live drops."); 
+                console.log("Network error fetching live drops:", e); 
             }
 
             buildInteractiveTags();
