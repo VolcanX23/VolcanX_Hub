@@ -506,7 +506,10 @@
             document.getElementById('live-data-counter').innerText = dictionary[systemLanguage].syncing;
             
             try {
-                let freeRes = await fetch('https://www.gamerpower.com/api/giveaways');
+                // 🚀 إضافة الـ Cache Buster هنا لمنع التصفح من حفظ نسخة قديمة من البيانات
+                let cacheBuster = new Date().getTime();
+                let freeRes = await fetch(`https://www.gamerpower.com/api/giveaways?t=${cacheBuster}`);
+                
                 if(freeRes.ok) {
                     let rawFree = await freeRes.json();
                     if(rawFree && rawFree.length > 0) {
@@ -522,7 +525,6 @@
                             url: item.open_giveaway_url
                         }));
 
-                        // تصفية التكرار بناءً على اسم اللعبة
                         freeGamesDatabase = mappedFree.filter((game, index, self) =>
                             index === self.findIndex((g) => g.title.toLowerCase().trim() === game.title.toLowerCase().trim())
                         );
