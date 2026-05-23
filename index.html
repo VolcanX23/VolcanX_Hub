@@ -500,36 +500,51 @@
         async function forceReloadSystemData() {
             document.getElementById('live-data-counter').innerText = dictionary[systemLanguage].syncing;
             
+            let cacheBuster = new Date().getTime();
+            let targetUrl = `https://www.gamerpower.com/api/giveaways?cb=${cacheBuster}`;
+            
+            let success = false;
+            let rawFree = [];
+
+            // البروكسي الأول (AllOrigins)
             try {
-                let cacheBuster = new Date().getTime();
-                let targetUrl = `https://www.gamerpower.com/api/giveaways?cb=${cacheBuster}`;
-                let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-                
-                let res = await fetch(proxyUrl);
+                let res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
                 if(res.ok) {
                     let container = await res.json();
-                    let rawFree = JSON.parse(container.contents);
-                    
-                    if(rawFree && rawFree.length > 0) {
-                        let mappedFree = rawFree.map(item => ({
-                            id: item.id,
-                            title: item.title,
-                            platforms: item.platforms,
-                            image: item.image,
-                            worth: item.worth,
-                            worthNum: parseFloat(item.worth.replace('$', '')) || 0,
-                            popularity: parseInt(item.users) || 0,
-                            endDate: systemLanguage === 'ar' ? "لفترة محدودة ⏰" : "Limited Time ⏰",
-                            url: item.open_giveaway_url
-                        }));
-
-                        freeGamesDatabase = mappedFree.filter((game, index, self) =>
-                            index === self.findIndex((g) => g.title.toLowerCase().trim() === game.title.toLowerCase().trim())
-                        );
-                    }
+                    rawFree = typeof container.contents === 'string' ? JSON.parse(container.contents) : container.contents;
+                    if (rawFree && rawFree.length > 0) success = true;
                 }
-            } catch(e) { 
-                console.log("Network error fetching live drops:", e); 
+            } catch(e) { console.log("Proxy 1 failed, trying backup..."); }
+
+            // البروكسي الثاني الاحتياطي في حال فشل الأول لمنع حدوث شاشة فارغة
+            if(!success) {
+                try {
+                    let res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+                    if(res.ok) {
+                        rawFree = await res.json();
+                        if (rawFree && rawFree.length > 0) success = true;
+                    }
+                } catch(e) { console.log("Backup proxy failed too."); }
+            }
+            
+            if(success && rawFree && rawFree.length > 0) {
+                let mappedFree = rawFree.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    platforms: item.platforms,
+                    image: item.image,
+                    worth: item.worth,
+                    worthNum: parseFloat(item.worth.replace('$', '')) || 0,
+                    popularity: parseInt(item.users) || 0,
+                    endDate: systemLanguage === 'ar' ? "لفترة محدودة ⏰" : "Limited Time ⏰",
+                    url: item.open_giveaway_url
+                }));
+
+                freeGamesDatabase = mappedFree.filter((game, index, self) =>
+                    index === self.findIndex((g) => g.title.toLowerCase().trim() === game.title.toLowerCase().trim())
+                );
+            } else {
+                freeGamesDatabase = [];
             }
 
             buildInteractiveTags();
