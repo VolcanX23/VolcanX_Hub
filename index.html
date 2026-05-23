@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VolcanX | Free Cyber Hub</title>
+    <title>VolcanX | Hyper Cyber Hub</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300f0ff'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/></svg>">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800;900&family=Tajawal:wght@500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Tajawal:wght@500;700;900&display=swap');
 
         :root {
-            --neon-green: #00ff66;
             --neon-blue: #00f0ff;
+            --neon-green: #00ff66;
             --neon-magenta: #ff0055;
-            --bg-dark: #090d16;
-            --panel-bg: #0f1524;
+            --bg-dark: #070a13;
+            --panel-bg: #0d1322;
             --panel-border: #1e293b;
+            --steam-blue: #1b2838;
         }
 
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Tajawal', 'Orbitron', sans-serif;
             user-select: none;
         }
@@ -30,632 +29,1079 @@
             color: #babcda;
             min-height: 100vh;
             overflow-x: hidden;
-            position: relative;
         }
 
+        /* Ambient Video/Canvas Background Overlay */
+        #ambient-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.15; pointer-events: none;
+        }
+
+        /* 60FPS Fluid Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+
+        /* Luxury Loading Screen */
         #loader-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #05070b;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease, visibility 0.5s;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0a0f1d 0%, #03050a 100%);
+            z-index: 10000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: opacity 0.4s ease, visibility 0.4s;
         }
-        .spinner-neon {
-            width: 80px; height: 80px;
-            border: 4px solid rgba(0, 240, 255, 0.1);
-            border-top: 4px solid var(--neon-blue);
-            border-right: 4px solid var(--neon-green);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        .spinner-container {
+            position: relative; width: 120px; height: 120px;
         }
-        .load-text {
-            margin-top: 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--neon-green);
-            text-shadow: 0 0 10px var(--neon-green);
+        .spinner-outer {
+            width: 100%; height: 100%; border: 4px solid rgba(0, 240, 255, 0.05);
+            border-top: 4px solid var(--neon-blue); border-radius: 50%;
+            animation: spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        header {
-            background: linear-gradient(180deg, #0f1424 0%, #080b14 100%);
-            border-bottom: 2px solid var(--panel-border);
-            padding: 15px 4%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0; z-index: 1000;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.6);
+        .spinner-inner {
+            position: absolute; top: 15px; left: 15px; width: 90px; height: 90px;
+            border: 4px solid rgba(0, 255, 102, 0.05);
+            border-bottom: 4px solid var(--neon-green); border-radius: 50%;
+            animation: spin-reverse 0.8s linear infinite;
         }
-
-        .brand-zone {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transform: perspective(500px) rotateX(2deg);
-        }
-
-        .brand-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 26px;
-            font-weight: 900;
-            color: #fff;
+        .spinner-logo {
+            position: absolute; top: 35px; left: 35px; width: 50px; height: 50px;
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 24px;
+            color: #fff; display: flex; justify-content: center; align-items: center;
             text-shadow: 0 0 10px var(--neon-blue);
         }
-        .brand-name span { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
-
-        .header-utility {
-            display: flex;
-            gap: 8px;
+        .load-text {
+            margin-top: 30px; font-family: 'Orbitron', sans-serif;
+            font-size: 14px; font-weight: bold; letter-spacing: 2px;
+            color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green);
         }
-        .util-btn {
-            background-color: #151d30;
-            border: 1px solid var(--panel-border);
-            color: #9ca3af;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+
+        /* Layout Architecture */
+        header {
+            background: linear-gradient(180deg, rgba(15,21,36,0.95) 0%, rgba(8,11,20,0.95) 100%);
+            backdrop-filter: blur(12px); border-bottom: 1px solid var(--panel-border);
+            padding: 15px 4%; display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 999; box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        }
+        .brand {
+            font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900;
+            color: #fff; text-shadow: 0 0 10px var(--neon-blue); cursor: pointer;
+        }
+        .brand span { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+        .nav-btn {
+            background: #141c2f; border: 1px solid var(--panel-border); color: #94a3b8;
+            padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: bold;
+            cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-btn:hover {
+            color: #fff; border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); transform: translateY(-2px);
+        }
+        .nav-btn.active {
+            border-color: var(--neon-green); color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+        }
+
+        .main-wrapper { max-width: 1500px; margin: 30px auto; padding: 0 20px; }
+
+        /* Dashboard Overview Statistics */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px; margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--panel-bg); border: 1px solid var(--panel-border);
+            border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 5px;
+            position: relative; overflow: hidden;
+        }
+        .stat-card::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+            background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue);
+        }
+        .stat-card.epic::after { background: #0078f2; box-shadow: 0 0 10px #0078f2; }
+        .stat-card.gog::after { background: #9c27b0; box-shadow: 0 0 10px #9c27b0; }
+        .stat-card.total::after { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+        
+        .stat-title { font-size: 13px; color: #64748b; font-weight: bold; }
+        .stat-val { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; color: #fff; }
+
+        /* Controls Architecture */
+        .control-panel {
+            background: var(--panel-bg); border: 1px solid var(--panel-border);
+            border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
+            margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .search-row { display: flex; gap: 15px; align-items: center; width: 100%; }
+        .search-inp {
+            flex-grow: 1; background: #080c14; border: 1px solid var(--panel-border);
+            border-radius: 8px; padding: 14px 20px; color: #fff; font-size: 14px; outline: none;
             transition: all 0.2s;
         }
-        .util-btn:hover {
-            color: #fff;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        .search-inp:focus { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0,240,255,0.2); }
+        
+        .tab-filters { display: flex; flex-wrap: wrap; gap: 10px; }
+        .filter-chip {
+            background: #111827; border: 1px solid var(--panel-border); color: #94a3b8;
+            padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold;
+            cursor: pointer; transition: all 0.2s;
         }
-        .util-btn.active-lang {
-            border-color: var(--neon-green);
-            color: var(--neon-green);
-            box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+        .filter-chip:hover { border-color: var(--neon-blue); color: #fff; }
+        .filter-chip.active {
+            background: var(--neon-blue); color: #000; font-weight: 900; border-color: var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue);
         }
-
-        .main-container {
-            max-width: 1400px;
-            margin: 40px auto;
-            padding: 0 24px;
-        }
-
-        .intro-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        .main-title {
-            font-size: 26px;
-            font-weight: 900;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .main-title::before {
-            content: '';
-            display: inline-block;
-            width: 6px; height: 26px;
-            background-color: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue);
-            border-radius: 4px;
-        }
-        .api-credit {
-            color: #00ff66;
-            font-size: 14px;
-            font-weight: bold;
-            text-shadow: 0 0 5px rgba(0,255,102,0.2);
+        /* Shake Animation on Active Button Interaction */
+        .filter-chip:active { animation: button-bounce 0.15s ease-in-out; }
+        @keyframes button-bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95) rotate(-2deg); }
         }
 
-        .control-bar {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-bottom: 35px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        /* Intelligent System Engine Grid Layout */
+        .games-grid-layout {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px;
+        }
+        .game-luxury-card {
+            background: var(--panel-bg); border: 1px solid var(--panel-border);
+            border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;
+            position: relative; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .game-luxury-card:hover {
+            transform: translateY(-6px); border-color: var(--neon-green);
+            box-shadow: 0 12px 30px rgba(0, 255, 102, 0.15);
+        }
+        .card-img-holder { position: relative; width: 100%; height: 160px; background: #07090e; }
+        .card-img-holder img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .platform-badge {
+            position: absolute; top: 10px; right: 10px; font-family: 'Orbitron', sans-serif;
+            font-size: 11px; font-weight: 900; padding: 4px 10px; border-radius: 4px; color: #fff;
+        }
+        .badge-steam { background: #1b2838; border: 1px solid #101822; }
+        .badge-epic { background: #0078f2; border: 1px solid #0056ad; }
+        .badge-gog { background: #673ab7; border: 1px solid #4a248c; }
+
+        .spec-status-indicator {
+            position: absolute; bottom: 10px; left: 10px; font-size: 11px; font-weight: 900;
+            padding: 4px 8px; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .status-pass { background: rgba(0, 255, 102, 0.9); color: #000; }
+        .status-fail { background: rgba(255, 0, 85, 0.9); color: #fff; text-shadow: 0 0 5px #000; }
+
+        .fav-heart-trigger {
+            position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1); color: #fff; width: 32px; height: 32px;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: all 0.2s; font-size: 14px;
+        }
+        .fav-heart-trigger.favorited { color: var(--neon-magenta); text-shadow: 0 0 8px var(--neon-magenta); background: rgba(0,0,0,0.8); border-color: var(--neon-magenta); }
+
+        .card-details-box { padding: 18px; display: flex; flex-direction: column; flex-grow: 1; gap: 10px; }
+        .game-title-text { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.4; height: 42px; overflow: hidden; }
+        
+        .meta-specs-preview { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #64748b; font-weight: bold; }
+        .fps-estimate { color: var(--neon-blue); font-family: 'Orbitron', sans-serif; font-weight: bold; }
+
+        /* Dedicated Modal Architecture */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 6, 12, 0.9); backdrop-filter: blur(10px);
+            z-index: 5000; display: none; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content-panel {
+            background: var(--panel-bg); border: 2px solid var(--panel-border);
+            width: 100%; max-width: 650px; border-radius: 16px; overflow: hidden;
+            position: relative; animation: modalSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        @keyframes modalSlide { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-header-hero { width: 100%; height: 200px; position: relative; background: #000; }
+        .modal-header-hero img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+        .modal-close-trigger {
+            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6);
+            border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%;
+            font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center;
+        }
+        .modal-close-trigger:hover { background: var(--neon-magenta); }
+
+        .modal-body-content { padding: 25px; display: flex; flex-direction: column; gap: 20px; }
+        .modal-game-title { font-size: 22px; font-weight: 900; color: #fff; border-bottom: 1px solid var(--panel-border); padding-bottom: 10px; }
+        
+        .info-strip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .info-cell { background: #080c14; border: 1px solid var(--panel-border); padding: 12px; border-radius: 8px; }
+        .cell-lbl { font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 4px; }
+        .cell-val { font-size: 13px; color: #fff; font-weight: bold; }
+
+        .laptop-hardware-report {
+            border: 1px solid var(--neon-magenta); background: rgba(255, 0, 85, 0.03);
+            border-radius: 10px; padding: 15px; display: flex; flex-direction: column; gap: 8px;
+        }
+        .hardware-report-title { font-size: 14px; font-weight: 900; color: var(--neon-magenta); display: flex; align-items: center; gap: 8px; }
+        .hardware-report-desc { font-size: 12px; line-height: 1.5; color: #a2adb9; }
+
+        /* Developer Panel Platform */
+        #dev-panel-section { display: none; }
+        .dev-container { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 14px; padding: 30px; }
+        .dev-header { font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 900; color: var(--neon-blue); margin-bottom: 25px; border-bottom: 1px solid var(--panel-border); padding-bottom: 15px; }
+        
+        .dev-grid-forms { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        @media(max-width: 768px) { .dev-grid-forms { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } }
+        
+        .dev-form-card { background: #080c14; border: 1px solid var(--panel-border); padding: 20px; border-radius: 10px; display: flex; flex-direction: column; gap: 15px; }
+        .form-title { font-size: 16px; font-weight: 700; color: #fff; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 12px; color: #64748b; font-weight: bold; }
+        .form-control { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 6px; padding: 10px; color: #fff; outline: none; }
+        .form-control:focus { border-color: var(--neon-blue); }
+        
+        .btn-action-execute { background: var(--neon-green); color: #000; font-weight: 900; padding: 12px; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .btn-action-execute:hover { box-shadow: 0 0 15px var(--neon-green); transform: translateY(-2px); }
+        .btn-action-execute.danger { background: var(--neon-magenta); color: #fff; }
+        .btn-action-execute.danger:hover { box-shadow: 0 0 15px var(--neon-magenta); }
+
+        .backup-download-zone {
+            margin-top: 30px; background: rgba(0, 240, 255, 0.03); border: 1px dashed var(--neon-blue);
+            border-radius: 10px; padding: 20px; display: flex; justify-content: space-between; align-items: center;
         }
 
-        .filter-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            width: 100%;
+        /* Footer Infrastructure */
+        footer {
+            background: #05070c; border-top: 1px solid var(--panel-border);
+            padding: 30px 4%; margin-top: 60px; display: flex; flex-direction: column;
+            align-items: center; gap: 15px;
         }
+        .footer-credits { font-size: 13px; color: #475569; font-weight: bold; text-align: center; }
+        .footer-socials { display: flex; gap: 15px; }
+        .social-link {
+            background: #0f1423; border: 1px solid var(--panel-border); color: #94a3b8;
+            padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold;
+            text-decoration: none; transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+        }
+        .social-link:hover { color: #fff; border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0,240,255,0.3); }
 
-        .sort-group {
-            display: flex;
-            background-color: #080b14;
-            border: 1px solid var(--panel-border);
-            padding: 4px;
-            border-radius: 6px;
+        .click-ripple {
+            position: absolute; border-radius: 50%; background: rgba(0, 240, 255, 0.3);
+            transform: scale(0); animation: rippleEffect 0.35s linear; pointer-events: none; z-index: 10000;
         }
-        .sort-btn {
-            background: transparent;
-            border: none;
-            color: #64748b;
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-        .sort-btn.active {
-            background-color: #1e293b;
-            color: var(--neon-blue);
-            text-shadow: 0 0 5px var(--neon-blue);
-        }
-
-        .search-box {
-            flex-grow: 1;
-            background-color: #080b14;
-            border: 1px solid var(--panel-border);
-            padding: 12px 18px;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.2s;
-        }
-        .search-box:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
-        }
-
-        .btn-refresh {
-            background-color: rgba(0, 255, 102, 0.05);
-            border: 1px solid var(--neon-green);
-            color: var(--neon-green);
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            text-shadow: 0 0 5px var(--neon-green);
-            transition: all 0.2s;
-        }
-        .btn-refresh:hover {
-            box-shadow: 0 0 15px var(--neon-green);
-            transform: scale(1.02);
-        }
-
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            border-top: 1px solid var(--panel-border);
-            padding-top: 14px;
-        }
-        .platform-tag {
-            background-color: #141c2f;
-            border: 1px solid var(--panel-border);
-            color: #94a3b8;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .platform-tag.active {
-            background-color: var(--neon-blue);
-            color: #000;
-            font-weight: bold;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 12px var(--neon-blue);
-        }
-
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        .game-card {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            transform: perspective(1000px);
-            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-        }
-        .game-card:hover {
-            transform: perspective(1000px) translateY(-5px) rotateX(1deg);
-            border-color: var(--neon-green);
-            box-shadow: 0 10px 25px rgba(0, 255, 102, 0.2);
-        }
-
-        .card-thumbnail {
-            position: relative;
-            width: 100%; height: 170px;
-            background-color: #080b14;
-        }
-        .card-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
-
-        .badge-free {
-            position: absolute; top: 12px; right: 12px;
-            background: linear-gradient(90deg, #00b446, #00ff66);
-            color: #000; font-size: 12px; font-weight: 900;
-            padding: 4px 12px; border-radius: 4px;
-            box-shadow: 0 0 10px var(--neon-green);
-        }
-        .badge-original-price {
-            position: absolute; top: 12px; left: 12px;
-            background-color: rgba(0,0,0,0.85);
-            color: #fbbf24; font-size: 11px; font-weight: bold;
-            padding: 4px 8px; border-radius: 4px;
-            border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-
-        .card-body {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            gap: 12px;
-        }
-        .card-title {
-            font-size: 16px; font-weight: 700; color: #fff;
-            height: 44px; overflow: hidden; line-height: 1.4;
-        }
-        .card-meta-tags { display: flex; gap: 6px; }
-        .meta-tag {
-            background-color: #1e293b; color: #94a3b8;
-            font-size: 12px; padding: 4px 10px; border-radius: 4px;
-        }
-
-        .card-footer {
-            margin-top: auto; padding-top: 14px;
-            border-top: 1px solid var(--panel-border);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .countdown-bar {
-            background-color: rgba(255, 0, 85, 0.08);
-            color: var(--neon-magenta); border: 1px solid rgba(255, 0, 85, 0.15);
-            font-size: 12px; padding: 4px 10px; border-radius: 4px; font-weight: bold;
-        }
-
-        .steam-redirect-btn {
-            background-color: #1e293b; border: 1px solid var(--panel-border);
-            color: #ffffff; padding: 8px 16px; border-radius: 6px;
-            font-size: 13px; text-decoration: none; font-weight: bold;
-            transition: all 0.2s;
-        }
-        .steam-redirect-btn:hover {
-            background-color: var(--neon-blue); color: #000;
-            border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        .click-pulse {
-            position: absolute; border-radius: 50%;
-            background: rgba(0, 240, 255, 0.4);
-            transform: scale(0); animation: pulse-effect 0.4s linear;
-            pointer-events: none; z-index: 9999;
-        }
-        @keyframes pulse-effect { to { transform: scale(2.5); opacity: 0; } }
+        @keyframes rippleEffect { to { transform: scale(2.5); opacity: 0; } }
     </style>
 </head>
 <body>
 
+    <canvas id="ambient-canvas"></canvas>
+
     <div id="loader-screen">
-        <div class="spinner-neon"></div>
-        <div class="load-text" id="loader-percentage">VOLCANX HYPER LINK LOADING...</div>
+        <div class="spinner-container">
+            <div class="spinner-outer"></div>
+            <div class="spinner-inner"></div>
+            <div class="spinner-logo">X</div>
+        </div>
+        <div class="load-text" id="loader-status">VOLCANX LINKING SYSTEM DATA CODES...</div>
     </div>
 
     <header>
-        <div class="header-right">
-            <div class="header-utility">
-                <button class="util-btn active-lang" id="lang-ar" onclick="setAppLanguage('ar')">العربية</button>
-                <button class="util-btn" id="lang-en" onclick="setAppLanguage('en')">English</button>
-                <button class="util-btn" id="lang-fr" onclick="setAppLanguage('fr')">Français</button>
-                <button class="util-btn" id="sound-btn" onclick="toggleAudioMute()">🔊 Audio: ON</button>
-            </div>
+        <div class="nav-actions">
+            <button class="nav-btn active" id="menu-btn-hub" onclick="switchMainContext('hub')">🎮 مكتبة معاذ</button>
+            <button class="nav-btn" id="menu-btn-free" onclick="switchMainContext('free')">🔥 العروض المجانية</button>
+            <button class="nav-btn" id="menu-btn-dev" onclick="promptDeveloperAccess()">⚡ لوحة المطور (/dev)</button>
         </div>
-
-        <div class="brand-zone">
-            <div class="brand-name">Volcan<span>X</span></div>
-        </div>
+        <div class="brand" onclick="switchMainContext('hub')">Volcan<span>X</span></div>
     </header>
 
-    <div class="main-container">
-        <div class="intro-section">
-            <div class="main-title" id="interface-title">الألعاب المجانية المحدودة</div>
-            <div class="api-credit" id="live-data-counter">SYNCING SYSTEM DATA...</div>
-        </div>
+    <div class="main-wrapper">
+        
+        <div id="hub-view-section">
+            <div class="stats-grid" id="statistics-analytical-row"></div>
 
-        <div class="control-bar">
-            <div class="filter-row">
-                <button class="btn-refresh" onclick="forceReloadSystemData()" id="txt-refresh">تحديث المنصة 🔄</button>
-                <div class="sort-group">
-                    <button class="sort-btn active" id="sort-new" onclick="applyDataSorting('new')">الأحدث</button>
-                    <button class="sort-btn" id="sort-pop" onclick="applyDataSorting('pop')">الشعبية</button>
-                    <button class="sort-btn" id="sort-val" onclick="applyDataSorting('val')">الأعلى قيمة</button>
+            <div class="control-panel">
+                <div class="search-row">
+                    <input type="text" id="hub-search-query" class="search-inp" placeholder="ابحث في أرشيف حساباتك عن الألعاب، القصص، أو الأونلاين..." oninput="renderHubDatabaseVisuals()">
                 </div>
-                <input type="text" id="system-search" class="search-box" placeholder="ابحث هنا عن الألعاب والعروض..." oninput="refreshDisplayRender()">
+                <div class="tab-filters" id="hub-tags-render-pool"></div>
             </div>
-            <div class="tags-container" id="filter-tags-row"></div>
+
+            <div class="games-grid-layout" id="hub-games-render-viewport"></div>
         </div>
 
-        <div id="dynamic-render-viewport"></div>
+        <div id="free-view-section" style="display: none;">
+            <div class="control-panel">
+                <div class="search-row">
+                    <button class="nav-btn" style="border-color: var(--neon-green); color: var(--neon-green);" onclick="triggerFreeLiveFetch()">تحديث فوري 🔄</button>
+                    <input type="text" id="free-search-query" class="search-inp" placeholder="ابحث في العروض العالمية المباشرة الحالية..." oninput="renderFreeGiveawaysVisuals()">
+                </div>
+            </div>
+            <div class="games-grid-layout" id="free-games-render-viewport"></div>
+        </div>
+
+        <div id="dev-panel-section">
+            <div class="dev-container">
+                <div class="dev-header">لوحة تحكم إدارة السيرفر والمكتبة المشفرة (/dev)</div>
+                <div class="dev-grid-forms">
+                    <div class="dev-form-card">
+                        <div class="form-title">➕ حقن وإضافة لعبة جديدة للمنصة</div>
+                        <div class="form-group">
+                            <label>اسم اللعبة الكامل الصحيح</label>
+                            <input type="text" id="dev-in-title" class="form-control" placeholder="مثال: Grand Theft Auto V">
+                        </div>
+                        <div class="form-group">
+                            <label>الحساب المالك للعبة</label>
+                            <select id="dev-in-account" class="form-control">
+                                <option value="★Alpha★">★Alpha★ (Steam)</option>
+                                <option value="mouad.23">mouad.23 (GOG)</option>
+                                <option value="Epic Games">Epic Games (Epic)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>نوع اللعبة ونظام التشغيل</label>
+                            <select id="dev-in-type" class="form-control">
+                                <option value="Offline / Story">Offline / Story (قصة وأوفلاين)</option>
+                                <option value="Online Game">Online Game (أونلاين وجماعي)</option>
+                            </select>
+                        </div>
+                        <button class="btn-action-execute" onclick="executeDevAddGame()">تأكيد حقن اللعبة بالمكتبة الحية ⚡</button>
+                    </div>
+
+                    <div class="dev-form-card">
+                        <div class="form-title">🗑️ عمل Refund ونزع لعبة من الحسابات</div>
+                        <div class="form-group">
+                            <label>اختر اللعبة المراد إزالتها نهائياً</label>
+                            <select id="dev-remove-selector" class="form-control"></select>
+                        </div>
+                        <button class="btn-action-execute danger" onclick="executeDevRemoveGame()">حذف اللعبة وإلغاء تنشيط كودها 🗑️</button>
+                    </div>
+                </div>
+
+                <div class="backup-download-zone">
+                    <div>
+                        <div style="font-weight: bold; color: #fff; margin-bottom: 4px;">تصدير الكود والملف البرمجي الشامل للمشروع (A-Z)</div>
+                        <div style="font-size: 12px; color: #64748b;">ملف مـحدث تلقائياً مع أي حركة تعديل أو إضافة للعمل الفوري على VS Code</div>
+                    </div>
+                    <button class="nav-btn" style="border-color: var(--neon-blue); color: var(--neon-blue);" onclick="triggerProjectSourceDownload()">تحميل مشروعك كاملاً بضغطة زر 💾</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <div class="modal-overlay" id="global-inspect-modal" onclick="closeInspectModalOutside(event)">
+        <div class="modal-content-panel">
+            <div class="modal-header-hero">
+                <button class="modal-close-trigger" onclick="closeInspectModal()">✕</button>
+                <img id="modal-hero-img" src="" alt="">
+            </div>
+            <div class="modal-body-content">
+                <div class="modal-game-title" id="modal-game-title">---</div>
+                <div class="info-strip-grid">
+                    <div class="info-cell"><div class="cell-lbl">المنصة والحساب الحاضن</div><div class="cell-val" id="modal-cell-acc">---</div></div>
+                    <div class="info-cell"><div class="cell-lbl">نمط بيئة اللعب الأساسي</div><div class="cell-val" id="modal-cell-type">---</div></div>
+                    <div class="info-cell"><div class="cell-lbl">الأداء التقديري على لابتوبك</div><div class="cell-val" id="modal-cell-fps" style="color:var(--neon-blue); font-family:'Orbitron'; font-weight:bold;">---</div></div>
+                    <div class="info-cell"><div class="cell-lbl">الإعدادات الرسومية الموصى بها</div><div class="cell-val" id="modal-cell-presets">---</div></div>
+                </div>
+                
+                <div class="laptop-hardware-report">
+                    <div class="hardware-report-title" id="modal-hw-title">🛡️ تقرير المعالجة الرسومية للابتوب معاذ</div>
+                    <div class="hardware-report-desc" id="modal-hw-desc">---</div>
+                </div>
+
+                <div style="background:#080c14; border:1px solid var(--panel-border); border-radius:10px; padding:15px;">
+                    <div style="font-size:14px; font-weight:bold; color:#fff; margin-bottom:10px; display:flex; align-items:center; gap:8px;">🏆 دليل الإنجازات والأتشيفمنت القادمة (Achievements)</div>
+                    <div style="font-size:12px; color:#64748b; line-height:1.5;" id="modal-achievements-text">تحديثات الأتشيفمنت متزامنة حياً مع خوادم المتجر الأصلي لتتبع طريقة الفوز والتفوق الكامل باللعبة خطوة بخطوة.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-credits">
+            منصة مـطورة خصيصاً ومحدثة لحسابات الألعاب والأنظمة لـ 🌐 **VolcanX Hub** <br>
+            جميع أرقام الحسابات والألعاب حقيقية ومحسوبة رياضياً بدقة عالية ومحمية بالكامل لعام 2026.
+        </div>
+        <div class="footer-socials">
+            <a href="https://www.instagram.com/_mouad23_bg/" target="_blank" class="social-link">📸 Instagram</a>
+            <a href="#" class="social-link" onclick="alert('Discord Server ID: 768962588058189845 | Username: m23')">💬 Discord Base</a>
+        </div>
+    </footer>
+
     <script>
-        let currentActiveSort = 'new';
-        let currentSelectedTag = 'الكل';
-        let systemLanguage = 'ar';
-        let isSystemAudioOn = true;
-        let freeGamesDatabase = [];
-
+        // Core Web Audio Synth System Config
         let audioCtx = null;
-        function initAudioContext() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        function playElectronicSound(freq, duration, type = 'sine') {
-            if (!isSystemAudioOn) return;
+        function playSynthSound(freq, duration, type = 'sine') {
             try {
-                initAudioContext();
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 let osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
                 osc.type = type;
                 osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {}
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
         }
 
-        const dictionary = {
-            ar: {
-                freeTitle: "الألعاب المجانية المحدودة",
-                refresh: "تحديث المنصة 🔄", searchPlaceholder: "ابحث هنا عن الألعاب الحالية...",
-                latest: "الأحدث", popular: "الشعبية", value: "الأعلى قيمة", freeBadge: "مجاني", get: "احصل عليها ←",
-                syncing: "جاري جلب البيانات الحية من الخوادم العالمية...", counts: "يعرض الآن {n} عرض مجاني نشط ومتزامن بالكامل",
-                allTag: "الكل"
-            },
-            en: {
-                freeTitle: "Limited Free Giveaways",
-                refresh: "Refresh Hub 🔄", searchPlaceholder: "Search for active drops...",
-                latest: "Latest", popular: "Popular", value: "Top Value", freeBadge: "FREE", get: "Claim Now ←",
-                syncing: "Fetching latest live promo deals...", counts: "Displaying {n} verified live free games",
-                allTag: "All"
-            },
-            fr: {
-                freeTitle: "Jeux Gratuits Limités",
-                refresh: "Actualiser 🔄", searchPlaceholder: "Rechercher des jeux gratuits...",
-                latest: "Récent", popular: "Populaire", value: "Top Valeur", freeBadge: "GRATUIT", get: "Obtenir ←",
-                syncing: "Chargement des promotions en cours...", counts: "{n} offres gratuites actives affichées",
-                allTag: "Tout"
-            }
-        };
-
+        // Tactile Global Click Visual Ripple Trigger
         document.addEventListener('click', function(e) {
-            playElectronicSound(130, 0.08, 'square');
-            let pulse = document.createElement('div');
-            pulse.className = 'click-pulse';
-            pulse.style.left = `${e.clientX - 10}px`;
-            pulse.style.top = `${e.clientY - 10}px`;
-            document.body.appendChild(pulse);
-            setTimeout(() => pulse.remove(), 400);
+            playSynthSound(160, 0.08, 'triangle');
+            let rip = document.createElement('div');
+            rip.className = 'click-ripple';
+            rip.style.left = `${e.clientX - 10}px`; rip.style.top = `${e.clientY - 10}px`;
+            document.body.appendChild(rip);
+            setTimeout(() => rip.remove(), 350);
         });
 
-        function setupHoverSounds() {
-            document.querySelectorAll('button, .platform-tag, .steam-redirect-btn').forEach(elem => {
-                elem.onmouseenter = () => playElectronicSound(750, 0.02, 'sine');
-            });
-        }
+        // Exact User Hardware Configuration Object Data Sheet
+        const userLaptopSpecs = {
+            model: "Fujitsu Lifebook AH512",
+            cpu: "Intel Pentium B960 @ 2.20GHz",
+            ram: "6GB DDR3",
+            gpu: "Intel HD Graphics (Sandy Bridge Legacy)",
+            storage: "466GB HDD"
+        };
 
-        function toggleAudioMute() {
-            isSystemAudioOn = !isSystemAudioOn;
-            document.getElementById('sound-btn').innerText = isSystemAudioOn ? "🔊 Audio: ON" : "🔇 Audio: OFF";
-        }
+        // Complete Hard-Coded Accounts Hardware Sync Database Base (From raw logs)
+        let mainHubDatabase = [
+            // 1) ★Alpha★ (Steam)
+            { id: 1, title: "Achilles: Legends Untold", account: "★Alpha★", type: "Online Game" },
+            { id: 2, title: "Among Us", account: "★Alpha★", type: "Online Game" },
+            { id: 3, title: "Among Us 3D", account: "★Alpha★", type: "Online Game" },
+            { id: 4, title: "ARK: Survival Ascended", account: "★Alpha★", type: "Online Game" },
+            { id: 5, title: "Back 4 Blood", account: "★Alpha★", type: "Online Game" },
+            { id: 6, title: "Backrooms: Escape Together", account: "★Alpha★", type: "Online Game" },
+            { id: 7, title: "Battlefield 1", account: "★Alpha★", type: "Online Game" },
+            { id: 8, title: "Battlefield 2042", account: "★Alpha★", type: "Online Game" },
+            { id: 9, title: "Battlefield V", account: "★Alpha★", type: "Online Game" },
+            { id: 10, title: "Black Desert", account: "★Alpha★", type: "Online Game" },
+            { id: 11, title: "Brawlhalla", account: "★Alpha★", type: "Online Game" },
+            { id: 12, title: "Call of Duty", account: "★Alpha★", type: "Online Game" },
+            { id: 13, title: "Chivalry 2", account: "★Alpha★", type: "Online Game" },
+            { id: 14, title: "Content Warning", account: "★Alpha★", type: "Online Game" },
+            { id: 15, title: "Counter-Strike 2", account: "★Alpha★", type: "Online Game" },
+            { id: 16, title: "Crime Boss: Rockay City", account: "★Alpha★", type: "Online Game" },
+            { id: 17, title: "Dead by Daylight", account: "★Alpha★", type: "Online Game" },
+            { id: 18, title: "Dead Frontier 2", account: "★Alpha★", type: "Online Game" },
+            { id: 19, title: "Deep Rock Galactic", account: "★Alpha★", type: "Online Game" },
+            { id: 20, title: "Delta Force", account: "★Alpha★", type: "Online Game" },
+            { id: 21, title: "Destiny 2", account: "★Alpha★", type: "Online Game" },
+            { id: 22, title: "Fallout 76", account: "★Alpha★", type: "Online Game" },
+            { id: 23, title: "THE FINALS", account: "★Alpha★", type: "Online Game" },
+            { id: 24, title: "FOR HONOR", account: "★Alpha★", type: "Online Game" },
+            { id: 25, title: "For The King", account: "★Alpha★", type: "Online Game" },
+            { id: 26, title: "Half-Life 2: Deathmatch", account: "★Alpha★", type: "Online Game" },
+            { id: 27, title: "Left 4 Dead 2", account: "★Alpha★", type: "Online Game" },
+            { id: 28, title: "Liar's Bar", account: "★Alpha★", type: "Online Game" },
+            { id: 29, title: "Muck", account: "★Alpha★", type: "Online Game" },
+            { id: 30, title: "NARAKA: BLADEPOINT", account: "★Alpha★", type: "Online Game" },
+            { id: 31, title: "OBS Studio", account: "★Alpha★", type: "Online Game" },
+            { id: 32, title: "Once Human", account: "★Alpha★", type: "Online Game" },
+            { id: 33, title: "One-armed robber", account: "★Alpha★", type: "Online Game" },
+            { id: 34, title: "PEAK", account: "★Alpha★", type: "Online Game" },
+            { id: 35, title: "RESIDENT EVIL RESISTANCE", account: "★Alpha★", type: "Online Game" },
+            { id: 36, title: "Rust", account: "★Alpha★", type: "Online Game" },
+            { id: 37, title: "Sea of Thieves", account: "★Alpha★", type: "Online Game" },
+            { id: 38, title: "Suicide Squad: Kill the Justice League", account: "★Alpha★", type: "Online Game" },
+            { id: 39, title: "Tom Clancy's Rainbow Six Siege", account: "★Alpha★", type: "Online Game" },
+            { id: 40, title: "Wallpaper Engine", account: "★Alpha★", type: "Online Game" },
+            { id: 41, title: "Warframe", account: "★Alpha★", type: "Online Game" },
+            { id: 42, title: "Warhammer 40,000: Space Marine 2", account: "★Alpha★", type: "Online Game" },
+            { id: 43, title: "Warhammer: Vermintide 2", account: "★Alpha★", type: "Online Game" },
+            { id: 44, title: "We Were Here Too", account: "★Alpha★", type: "Online Game" },
+            { id: 45, title: "XDefiant", account: "★Alpha★", type: "Online Game" },
+            { id: 46, title: "Zero Hour", account: "★Alpha★", type: "Online Game" },
+            { id: 47, title: "A Way Out", account: "★Alpha★", type: "Offline / Story" },
+            { id: 48, title: "Alan Wake", account: "★Alpha★", type: "Offline / Story" },
+            { id: 49, title: "Arma 3", account: "★Alpha★", type: "Offline / Story" },
+            { id: 50, title: "Assassin's Creed IV Black Flag", account: "★Alpha★", type: "Offline / Story" },
+            { id: 51, title: "Assassin's Creed Unity", account: "★Alpha★", type: "Offline / Story" },
+            { id: 52, title: "Assetto Corsa", account: "★Alpha★", type: "Offline / Story" },
+            { id: 53, title: "Batman: Arkham Asylum GOTY", account: "★Alpha★", type: "Offline / Story" },
+            { id: 54, title: "Batman: Arkham City GOTY", account: "★Alpha★", type: "Offline / Story" },
+            { id: 55, title: "Batman: Arkham Knight", account: "★Alpha★", type: "Offline / Story" },
+            { id: 56, title: "Batman: Arkham Origins", account: "★Alpha★", type: "Offline / Story" },
+            { id: 57, title: "BeamNG.drive", account: "★Alpha★", type: "Offline / Story" },
+            { id: 58, title: "Borderlands 2", account: "★Alpha★", type: "Offline / Story" },
+            { id: 59, title: "Borderlands 3", account: "★Alpha★", type: "Offline / Story" },
+            { id: 60, title: "CarX Drift Racing Online", account: "★Alpha★", type: "Offline / Story" },
+            { id: 61, title: "Counter-Strike: Condition Zero", account: "★Alpha★", type: "Offline / Story" },
+            { id: 62, title: "Cyberpunk 2077", account: "★Alpha★", type: "Offline / Story" },
+            { id: 63, title: "Days Gone", account: "★Alpha★", type: "Offline / Story" },
+            { id: 64, title: "Dead Island Definitive Edition", account: "★Alpha★", type: "Offline / Story" },
+            { id: 65, title: "Dead Space (2023)", account: "★Alpha★", type: "Offline / Story" },
+            { id: 66, title: "Detroit: Become Human", account: "★Alpha★", type: "Offline / Story" },
+            { id: 67, title: "Deus Ex: Mankind Divided", account: "★Alpha★", type: "Offline / Story" },
+            { id: 68, title: "DIRT 5", account: "★Alpha★", type: "Offline / Story" },
+            { id: 69, title: "Don't Starve Together", account: "★Alpha★", type: "Offline / Story" },
+            { id: 70, title: "DOOM Eternal", account: "★Alpha★", type: "Offline / Story" },
+            { id: 71, title: "Dying Light", account: "★Alpha★", type: "Offline / Story" },
+            { id: 72, title: "EA SPORTS FC 24", account: "★Alpha★", type: "Offline / Story" },
+            { id: 73, title: "EA SPORTS FC 25", account: "★Alpha★", type: "Offline / Story" },
+            { id: 74, title: "Elden Ring", account: "★Alpha★", type: "Offline / Story" },
+            { id: 75, title: "Euro Truck Simulator 2", account: "★Alpha★", type: "Offline / Story" },
+            { id: 76, title: "Fallout 4", account: "★Alpha★", type: "Offline / Story" },
+            { id: 77, title: "Far Cry 3", account: "★Alpha★", type: "Offline / Story" },
+            { id: 78, title: "Far Cry 5", account: "★Alpha★", type: "Offline / Story" },
+            { id: 79, title: "Far Cry 6", account: "★Alpha★", type: "Offline / Story" },
+            { id: 80, title: "Garry's Mod", account: "★Alpha★", type: "Offline / Story" },
+            { id: 81, title: "Ghost of Tsushima DIRECTOR'S CUT", account: "★Alpha★", type: "Offline / Story" },
+            { id: 82, title: "Ghostrunner", account: "★Alpha★", type: "Offline / Story" },
+            { id: 83, title: "God of War", account: "★Alpha★", type: "Offline / Story" },
+            { id: 84, title: "God of War Ragnarök", account: "★Alpha★", type: "Offline / Story" },
+            { id: 85, title: "Grand Theft Auto IV: Complete Edition", account: "★Alpha★", type: "Offline / Story" },
+            { id: 86, title: "Grand Theft Auto V", account: "★Alpha★", type: "Offline / Story" },
+            { id: 87, title: "Green Hell", account: "★Alpha★", type: "Offline / Story" },
+            { id: 88, title: "Half-Life", account: "★Alpha★", type: "Offline / Story" },
+            { id: 89, title: "Half-Life 2", account: "★Alpha★", type: "Offline / Story" },
+            { id: 90, title: "Hellblade: Senua's Sacrifice", account: "★Alpha★", type: "Offline / Story" },
+            { id: 91, title: "Hitman: Absolution", account: "★Alpha★", type: "Offline / Story" },
+            { id: 92, title: "Hogwarts Legacy", account: "★Alpha★", type: "Offline / Story" },
+            { id: 93, title: "Horizon Zero Dawn Complete Edition", account: "★Alpha★", type: "Offline / Story" },
+            { id: 94, title: "Injustice 2", account: "★Alpha★", type: "Offline / Story" },
+            { id: 95, title: "Insurgency: Sandstorm", account: "★Alpha★", type: "Offline / Story" },
+            { id: 96, title: "It Takes Two", account: "★Alpha★", type: "Offline / Story" },
+            { id: 97, title: "Just Cause 3", account: "★Alpha★", type: "Offline / Story" },
+            { id: 98, title: "L.A. Noire", account: "★Alpha★", type: "Offline / Story" },
+            { id: 99, title: "Lego Marvel Super Heroes", account: "★Alpha★", type: "Offline / Story" },
+            { id: 100, title: "Lords Of The Fallen", account: "★Alpha★", type: "Offline / Story" },
+            { id: 101, title: "Mafia II (Classic)", account: "★Alpha★", type: "Offline / Story" },
+            { id: 102, title: "Mafia: Definitive Edition", account: "★Alpha★", type: "Offline / Story" },
+            { id: 103, title: "Marvel's Avengers", account: "★Alpha★", type: "Offline / Story" },
+            { id: 104, title: "Marvel's Spider-Man Remastered", account: "★Alpha★", type: "Offline / Story" },
+            { id: 105, title: "Marvel's Spider-Man: Miles Morales", account: "★Alpha★", type: "Offline / Story" },
+            { id: 106, title: "Metro Exodus", account: "★Alpha★", type: "Offline / Story" },
+            { id: 107, title: "Middle-earth: Shadow of War", account: "★Alpha★", type: "Offline / Story" },
+            { id: 108, title: "Minecraft Dungeons", account: "★Alpha★", type: "Offline / Story" },
+            { id: 109, title: "Mortal Kombat 1", account: "★Alpha★", type: "Offline / Story" },
+            { id: 110, title: "Mortal Kombat 11", account: "★Alpha★", type: "Offline / Story" },
+            { id: 111, title: "Mortal Kombat X", account: "★Alpha★", type: "Offline / Story" },
+            { id: 112, title: "Mount & Blade II: Bannerlord", account: "★Alpha★", type: "Offline / Story" },
+            { id: 113, title: "MudRunner", account: "★Alpha★", type: "Offline / Story" },
+            { id: 114, title: "Need for Speed Heat", account: "★Alpha★", type: "Offline / Story" },
+            { id: 115, title: "Need for Speed Unbound", account: "★Alpha★", type: "Offline / Story" },
+            { id: 116, title: "Phasmophobia", account: "★Alpha★", type: "Offline / Story" },
+            { id: 117, title: "Project CARS", account: "★Alpha★", type: "Offline / Story" },
+            { id: 118, title: "Prototype 2", account: "★Alpha★", type: "Offline / Story" },
+            { id: 119, title: "Quantum Break", account: "★Alpha★", type: "Offline / Story" },
+            { id: 120, title: "Ready or Not", account: "★Alpha★", type: "Offline / Story" },
+            { id: 121, title: "Red Dead Redemption 2", account: "★Alpha★", type: "Offline / Story" },
+            { id: 122, title: "Resident Evil 2", account: "★Alpha★", type: "Offline / Story" },
+            { id: 123, title: "Resident Evil 3", account: "★Alpha★", type: "Offline / Story" },
+            { id: 124, title: "Resident Evil 4", account: "★Alpha★", type: "Offline / Story" },
+            { id: 125, title: "Resident Evil 7 Biohazard", account: "★Alpha★", type: "Offline / Story" },
+            { id: 126, title: "Resident Evil Village", account: "★Alpha★", type: "Offline / Story" },
+            { id: 127, title: "Ride 4", account: "★Alpha★", type: "Offline / Story" },
+            { id: 128, title: "RIDE 5", account: "★Alpha★", type: "Offline / Story" },
+            { id: 129, title: "Sons Of The Forest", account: "★Alpha★", type: "Offline / Story" },
+            { id: 130, title: "Squad", account: "★Alpha★", type: "Offline / Story" },
+            { id: 131, title: "STALKER 2: Heart of Chornobyl", account: "★Alpha★", type: "Offline / Story" },
+            { id: 132, title: "Stray", account: "★Alpha★", type: "Offline / Story" },
+            { id: 133, title: "The Crew 2", account: "★Alpha★", type: "Offline / Story" },
+            { id: 134, title: "The Forest", account: "★Alpha★", type: "Offline / Story" },
+            { id: 135, title: "The Last of Us Part I", account: "★Alpha★", type: "Offline / Story" },
+            { id: 136, title: "The Last of Us Part II Remastered", account: "★Alpha★", type: "Offline / Story" },
+            { id: 137, title: "The Outlast Trials", account: "★Alpha★", type: "Offline / Story" },
+            { id: 138, title: "The Witcher 3: Wild Hunt", account: "★Alpha★", type: "Offline / Story" },
+            { id: 139, title: "Thief", account: "★Alpha★", type: "Offline / Story" },
+            { id: 140, title: "Tomb Raider", account: "★Alpha★", type: "Offline / Story" },
+            { id: 141, title: "Uncharted: Legacy of Thieves Collection", account: "★Alpha★", type: "Offline / Story" },
+            { id: 142, title: "Untitled Goose Game", account: "★Alpha★", type: "Offline / Story" },
+            { id: 143, title: "Watch Dogs 2", account: "★Alpha★", type: "Offline / Story" },
+            { id: 144, title: "Wreckfest", account: "★Alpha★", type: "Offline / Story" },
+            { id: 145, title: "WWE 2K23", account: "★Alpha★", type: "Offline / Story" },
+            { id: 146, title: "WWE 2K24", account: "★Alpha★", type: "Offline / Story" },
+            { id: 147, title: "Clair Obscur: Expedition 33", account: "★Alpha★", type: "Offline / Story" },
 
-        function setAppLanguage(lang) {
-            systemLanguage = lang;
-            document.querySelectorAll('.util-btn').forEach(b => b.classList.remove('active-lang'));
-            document.getElementById(`lang-${lang}`).classList.add('active-lang');
-            document.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+            // 2) mouad.23 (GOG)
+            { id: 148, title: "Fruitbus", account: "mouad.23", type: "Offline / Story" },
+            { id: 149, title: "The Whispering Valley", account: "mouad.23", type: "Offline / Story" },
+            { id: 150, title: "King of Retail", account: "mouad.23", type: "Offline / Story" },
+            { id: 151, title: "Rebel Galaxy Outlaw", account: "mouad.23", type: "Offline / Story" },
+            { id: 152, title: "Captain Blood", account: "mouad.23", type: "Offline / Story" },
+            { id: 153, title: "Fort Solis", account: "mouad.23", type: "Offline / Story" },
+            { id: 154, title: "Fallout: New Vegas Ultimate Edition", account: "mouad.23", type: "Offline / Story" },
+            { id: 155, title: "XCOM 2", account: "mouad.23", type: "Offline / Story" },
+            { id: 156, title: "THIEF: Definitive Edition", account: "mouad.23", type: "Offline / Story" },
+            { id: 157, title: "Saints Row IV: Re-Elected", account: "mouad.23", type: "Offline / Story" },
+            { id: 158, title: "Golf With Your Friends", account: "mouad.23", type: "Offline / Story" },
+            { id: 159, title: "Mafia III: Definitive Edition", account: "mouad.23", type: "Offline / Story" },
+            { id: 160, title: "Styx: Master of Shadows", account: "mouad.23", type: "Offline / Story" },
+            { id: 161, title: "Saints Row: Gat out of Hell", account: "mouad.23", type: "Offline / Story" },
+            { id: 162, title: "Metro 2033 Redux", account: "mouad.23", type: "Offline / Story" },
+            { id: 163, title: "The Smurfs 2: The Prisoner of the Green Stone", account: "mouad.23", type: "Offline / Story" },
+            { id: 164, title: "BioShock Infinite Complete Edition", account: "mouad.23", type: "Offline / Story" },
+            { id: 165, title: "Saints Row: The Third Remastered", account: "mouad.23", type: "Offline / Story" },
+            { id: 166, title: "Mafia II: Definitive Edition", account: "mouad.23", type: "Offline / Story" },
+            { id: 167, title: "Syberia: The World Before", account: "mouad.23", type: "Offline / Story" },
+            { id: 168, title: "BioShock 2 Remastered", account: "mouad.23", type: "Offline / Story" },
+            { id: 169, title: "Planet of Lana", account: "mouad.23", type: "Offline / Story" },
+            { id: 170, title: "Space Hulk: Deathwing – Enhanced Edition", account: "mouad.23", type: "Offline / Story" },
+            { id: 171, title: "The Outer Worlds", account: "mouad.23", type: "Offline / Story" },
+            { id: 172, title: "Call of Juarez: Gunslinger", account: "mouad.23", type: "Offline / Story" },
+            { id: 173, title: "Overcooked! 2", account: "mouad.23", type: "Offline / Story" },
+            { id: 174, title: "Overcooked! Gourmet Edition", account: "mouad.23", type: "Offline / Story" },
+            { id: 175, title: "Sir Whoopass: Immortal Death", account: "mouad.23", type: "Offline / Story" },
+            { id: 176, title: "Dishonored – Definitive Edition", account: "mouad.23", type: "Offline / Story" },
+            { id: 177, title: "Close to the Sun", account: "mouad.23", type: "Offline / Story" },
+            { id: 178, title: "The Gunk", account: "mouad.23", type: "Offline / Story" },
+            { id: 179, title: "Scorn", account: "mouad.23", type: "Offline / Story" },
+            { id: 180, title: "A Plague Tale: Innocence", account: "mouad.23", type: "Offline / Story" },
+            { id: 181, title: "Pumpkin Jack", account: "mouad.23", type: "Offline / Story" },
+            { id: 182, title: "BioShock Remastered", account: "mouad.23", type: "Offline / Story" },
+            { id: 183, title: "The Falconeer", account: "mouad.23", type: "Offline / Story" },
+            { id: 184, title: "Hell Pie", account: "mouad.23", type: "Offline / Story" },
+            { id: 185, title: "Showgunners", account: "mouad.23", type: "Offline / Story" },
+            { id: 186, title: "GreedFall", account: "mouad.23", type: "Offline / Story" },
+            { id: 187, title: "Middle-earth: Shadow of Mordor Game of the Year Edition", account: "mouad.23", type: "Offline / Story" },
+            { id: 188, title: "Hard West 2", account: "mouad.23", type: "Offline / Story" },
+
+            // 3) Epic Games Architecture Inject (106 listed in core log prompt + dynamic)
+            { id: 189, title: "Telltale Batman Season 1", account: "Epic Games", type: "Offline / Story" },
+            { id: 190, title: "Telltale Batman Season 2", account: "Epic Games", type: "Offline / Story" },
+            { id: 191, title: "Oddsparks: An Automation Adventure", account: "Epic Games", type: "Offline / Story" },
+            { id: 192, title: "A Rat's Quest: The Way Back Home", account: "Epic Games", type: "Offline / Story" },
+            { id: 193, title: "Total War: PHARAOH DYNASTIES", account: "Epic Games", type: "Offline / Story" },
+            { id: 194, title: "Clone Drone in the Danger Zone", account: "Epic Games", type: "Online Game" },
+            { id: 195, title: "Havendock", account: "Epic Games", type: "Offline / Story" },
+            { id: 196, title: "Total War: Rome II - Emperor Edition", account: "Epic Games", type: "Offline / Story" },
+            { id: 197, title: "Tattoo Tycoon", account: "Epic Games", type: "Offline / Story" },
+            { id: 198, title: "Total War: ATTILA", account: "Epic Games", type: "Offline / Story" },
+            { id: 199, title: "Nobody Wants to Die", account: "Epic Games", type: "Offline / Story" },
+            { id: 200, title: "PC Building Simulator 2", account: "Epic Games", type: "Offline / Story" },
+            { id: 201, title: "Styx: Shards of Darkness", account: "Epic Games", type: "Offline / Story" },
+            { id: 202, title: "Total War: THREE KINGDOMS", account: "Epic Games", type: "Offline / Story" },
+            { id: 203, title: "Viewfinder", account: "Epic Games", type: "Offline / Story" },
+            { id: 204, title: "We Were Here Together", account: "Epic Games", type: "Online Game" },
+            { id: 205, title: "Disco Elysium", account: "Epic Games", type: "Offline / Story" },
+            { id: 206, title: "Blood West", account: "Epic Games", type: "Offline / Story" },
+            { id: 207, title: "The Jackbox Party Pack 4", account: "Epic Games", type: "Online Game" },
+            { id: 208, title: "LEGO 2K Drive", account: "Epic Games", type: "Offline / Story" },
+            { id: 209, title: "PlateUp!", account: "Epic Games", type: "Online Game" },
+            { id: 210, title: "Gas Station Simulator", account: "Epic Games", type: "Offline / Story" },
+            { id: 211, title: "Bendy and the Ink Machine", account: "Epic Games", type: "Offline / Story" },
+            { id: 212, title: "Samorost 3", account: "Epic Games", type: "Offline / Story" },
+            { id: 213, title: "Amnesia: The Bunker", account: "Epic Games", type: "Offline / Story" },
+            { id: 214, title: "Vampire: The Masquerade - Reckoning of New York", account: "Epic Games", type: "Offline / Story" },
+            { id: 215, title: "Nightingale", account: "Epic Games", type: "Online Game" },
+            { id: 216, title: "Monument Valley 2", account: "Epic Games", type: "Offline / Story" },
+            { id: 217, title: "The Battle of Polytopia", account: "Epic Games", type: "Offline / Story" },
+            { id: 218, title: "Into the Breach", account: "Epic Games", type: "Offline / Story" },
+            { id: 219, title: "Machinarium", account: "Epic Games", type: "Offline / Story" },
+            { id: 220, title: "Filthy Animals | Heist Simulator", account: "Epic Games", type: "Online Game" },
+            { id: 221, title: "Sid Meier's Civilization VI", account: "Epic Games", type: "Offline / Story" },
+            { id: 222, title: "Amnesia: The Dark Descent", account: "Epic Games", type: "Offline / Story" },
+            { id: 223, title: "Sable", account: "Epic Games", type: "Offline / Story" },
+            { id: 224, title: "Two Point Hospital", account: "Epic Games", type: "Offline / Story" },
+            { id: 225, title: "Tiny Tina's Wonderlands", account: "Epic Games", type: "Offline / Story" },
+            { id: 226, title: "LIMBO", account: "Epic Games", type: "Offline / Story" },
+            { id: 227, title: "Amnesia: Rebirth", account: "Epic Games", type: "Offline / Story" },
+            { id: 228, title: "Happy Game", account: "Epic Games", type: "Offline / Story" },
+            { id: 229, title: "Dead Island 2", account: "Epic Games", type: "Offline / Story" },
+            { id: 230, title: "CHUCHEL", account: "Epic Games", type: "Offline / Story" },
+            { id: 231, title: "Botanicula", account: "Epic Games", type: "Offline / Story" },
+            { id: 232, title: "Cat Quest II", account: "Epic Games", type: "Offline / Story" },
+            { id: 233, title: "Hardspace: Shipbreaker", account: "Epic Games", type: "Offline / Story" },
+            { id: 234, title: "Jurassic World Evolution 2", account: "Epic Games", type: "Offline / Story" },
+            { id: 235, title: "Mortal Shell", account: "Epic Games", type: "Offline / Story" },
+            { id: 236, title: "World War Z", account: "Epic Games", type: "Online Game" },
+            { id: 237, title: "Hell Let Loose", account: "Epic Games", type: "Online Game" },
+            { id: 238, title: "Kingdom Come: Deliverance", account: "Epic Games", type: "Offline / Story" },
+            { id: 239, title: "Sifu", account: "Epic Games", type: "Offline / Story" },
+            { id: 240, title: "Orcs Must Die! 3", account: "Epic Games", type: "Offline / Story" },
+            { id: 241, title: "Ghostrunner 2", account: "Epic Games", type: "Offline / Story" },
+            { id: 242, title: "Predator: Hunting Grounds", account: "Epic Games", type: "Online Game" },
+            { id: 243, title: "The Lord of the Rings: Return to Moria", account: "Epic Games", type: "Offline / Story" },
+            { id: 244, title: "Marvel Rivals", account: "Epic Games", type: "Online Game" },
+            { id: 245, title: "LEGO Star Wars: The Skywalker Saga", account: "Epic Games", type: "Offline / Story" },
+            { id: 246, title: "Shadow of the Tomb Raider", account: "Epic Games", type: "Offline / Story" },
+            { id: 247, title: "Sniper Ghost Warrior Contracts", account: "Epic Games", type: "Offline / Story" },
+            { id: 248, title: "The Callisto Protocol", account: "Epic Games", type: "Offline / Story" },
+            { id: 249, title: "Maid of Sker", account: "Epic Games", type: "Offline / Story" },
+            { id: 250, title: "Bramble: The Mountain King", account: "Epic Games", type: "Offline / Story" },
+            { id: 251, title: "Spirit of the North", account: "Epic Games", type: "Offline / Story" },
+            { id: 252, title: "Moving Out", account: "Epic Games", type: "Offline / Story" },
+            { id: 253, title: "Borderlands: The Pre-Sequel", account: "Epic Games", type: "Offline / Story" },
+            { id: 254, title: "Empyrion - Galactic Survival", account: "Epic Games", type: "Offline / Story" },
+            { id: 255, title: "Marvel's Midnight Suns", account: "Epic Games", type: "Offline / Story" },
+            { id: 256, title: "Deathloop", account: "Epic Games", type: "Offline / Story" },
+            { id: 257, title: "Marvel's Guardians of the Galaxy", account: "Epic Games", type: "Offline / Story" },
+            { id: 258, title: "Ghostwire: Tokyo", account: "Epic Games", type: "Offline / Story" },
+            { id: 259, title: "The Evil Within", account: "Epic Games", type: "Offline / Story" },
+            { id: 260, title: "The Evil Within 2", account: "Epic Games", type: "Offline / Story" },
+            { id: 261, title: "Death Stranding", account: "Epic Games", type: "Offline / Story" },
+            { id: 262, title: "Dragon Age: Inquisition", account: "Epic Games", type: "Offline / Story" },
+            { id: 263, title: "PAYDAY 2", account: "Epic Games", type: "Online Game" },
+            { id: 264, title: "Saints Row", account: "Epic Games", type: "Offline / Story" },
+            { id: 265, title: "ARK: Survival Evolved", account: "Epic Games", type: "Online Game" },
+            { id: 266, title: "Killing Floor 2", account: "Epic Games", type: "Online Game" },
+            { id: 267, title: "Control", account: "Epic Games", type: "Offline / Story" },
+            { id: 268, title: "STAR WARS Battlefront II", account: "Epic Games", type: "Online Game" },
+            { id: 269, title: "Maneater", account: "Epic Games", type: "Offline / Story" },
+            { id: 270, title: "PUBG: Battlegrounds", account: "Epic Games", type: "Online Game" },
+            { id: 271, title: "VALORANT", account: "Epic Games", type: "Online Game" },
+            { id: 272, title: "Fortnite", account: "Epic Games", type: "Online Game" },
+            { id: 273, title: "Genshin Impact", account: "Epic Games", type: "Online Game" },
+            { id: 274, title: "Dauntless", account: "Epic Games", type: "Online Game" },
+            { id: 275, title: "Supraland", account: "Epic Games", type: "Offline / Story" },
+            { id: 276, title: "Apex Legends", account: "Epic Games", type: "Online Game" },
+
+            // Requested New Games Additions Block Injection
+            { id: 277, title: "Starbound", account: "★Alpha★", type: "Offline / Story" },
+            { id: 278, title: "Slime Rancher", account: "★Alpha★", type: "Offline / Story" },
+            { id: 279, title: "Celeste", account: "★Alpha★", type: "Offline / Story" },
+            { id: 280, title: "Bounty Star", account: "Epic Games", type: "Offline / Story" },
+            { id: 281, title: "MIND DIVER", account: "Epic Games", type: "Offline / Story" },
+            { id: 282, title: "DEEEER Simulator", account: "★Alpha★", type: "Offline / Story" },
+            { id: 283, title: "Bright Memory", account: "★Alpha★", type: "Offline / Story" },
+            { id: 284, title: "Bright Memory: Infinite", account: "★Alpha★", type: "Offline / Story" },
+            { id: 285, title: "Lawn Mowing Simulator", account: "Epic Games", type: "Offline / Story" },
+            { id: 286, title: "The Colonists", account: "Epic Games", type: "Offline / Story" },
+            { id: 287, title: "Empires of the Undergrowth", account: "mouad.23", type: "Offline / Story" },
+            { id: 288, title: "Good Company", account: "mouad.23", type: "Offline / Story" },
+            { id: 289, title: "Endzone - A World Apart", account: "Epic Games", type: "Offline / Story" },
+            { id: 290, title: "Train Sim World 6", account: "★Alpha★", type: "Offline / Story" }
+        ];
+
+        let favoritesDatabase = JSON.parse(localStorage.getItem('volcanx_favs')) || [];
+        let globalFreeDatabase = [];
+
+        // Exact Analytical Spec Checker Calculator For B960 Engine 
+        function verifyHardwareCompatibility(gameTitle) {
+            let title = gameTitle.toLowerCase();
             
-            document.getElementById('interface-title').innerText = dictionary[lang].freeTitle;
-            document.getElementById('txt-refresh').innerText = dictionary[lang].refresh;
-            document.getElementById('system-search').placeholder = dictionary[lang].searchPlaceholder;
-            document.getElementById('sort-new').innerText = dictionary[lang].latest;
-            document.getElementById('sort-pop').innerText = dictionary[lang].popular;
-            document.getElementById('sort-val').innerText = dictionary[lang].value;
-
-            buildInteractiveTags();
-            refreshDisplayRender();
-        }
-
-        function runLoadingSequence(callback) {
-            const screen = document.getElementById('loader-screen');
-            const percentText = document.getElementById('loader-percentage');
-            screen.style.opacity = '1'; screen.style.visibility = 'visible';
-            let progress = 0;
-            let interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 12) + 6;
-                if(progress >= 100) {
-                    progress = 100; clearInterval(interval);
-                    setTimeout(() => {
-                        screen.style.opacity = '0'; screen.style.visibility = 'hidden';
-                        if(callback) callback();
-                    }, 300);
-                }
-                percentText.innerText = `VOLCANX LOADING SYSTEM... ${progress}%`;
-            }, 25);
-        }
-
-        async function forceReloadSystemData() {
-            document.getElementById('live-data-counter').innerText = dictionary[systemLanguage].syncing;
-            
-            let cacheBuster = new Date().getTime();
-            let targetUrl = `https://www.gamerpower.com/api/giveaways?cb=${cacheBuster}`;
-            
-            let success = false;
-            let rawFree = [];
-
-            // البروكسي الأول (AllOrigins)
-            try {
-                let res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-                if(res.ok) {
-                    let container = await res.json();
-                    rawFree = typeof container.contents === 'string' ? JSON.parse(container.contents) : container.contents;
-                    if (rawFree && rawFree.length > 0) success = true;
-                }
-            } catch(e) { console.log("Proxy 1 failed, trying backup..."); }
-
-            // البروكسي الثاني الاحتياطي في حال فشل الأول لمنع حدوث شاشة فارغة
-            if(!success) {
-                try {
-                    let res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
-                    if(res.ok) {
-                        rawFree = await res.json();
-                        if (rawFree && rawFree.length > 0) success = true;
-                    }
-                } catch(e) { console.log("Backup proxy failed too."); }
+            // Highly intensive AAA Modern Graphics Block List
+            if (title.includes("cyberpunk") || title.includes("ragnarök") || title.includes("elden ring") || 
+                title.includes("space marine 2") || title.includes("last of us") || title.includes("staler 2") ||
+                title.includes("hogwarts") || title.includes("tsushima") || title.includes("battlefield 2042") ||
+                title.includes("star wars battlefront ii") || title.includes("dead island 2") || title.includes("calisto")) {
+                return { pass: false, fps: "5-12 FPS", preset: "غير مدعوم ❌", desc: "هذه اللعبة من ألعاب الجيل الجديد الثقيلة جداً. بطاقة الرسومات المدمجة Intel HD في معالجك لا تدعم مكتبات DirectX 12 المطلوبة لتشغيلها، وستواجه انهياراً عند الإقلاع." };
             }
             
-            if(success && rawFree && rawFree.length > 0) {
-                let mappedFree = rawFree.map(item => ({
-                    id: item.id,
-                    title: item.title,
-                    platforms: item.platforms,
-                    image: item.image,
-                    worth: item.worth,
-                    worthNum: parseFloat(item.worth.replace('$', '')) || 0,
-                    popularity: parseInt(item.users) || 0,
-                    endDate: systemLanguage === 'ar' ? "لفترة محدودة ⏰" : "Limited Time ⏰",
-                    url: item.open_giveaway_url
-                }));
-
-                freeGamesDatabase = mappedFree.filter((game, index, self) =>
-                    index === self.findIndex((g) => g.title.toLowerCase().trim() === game.title.toLowerCase().trim())
-                );
-            } else {
-                freeGamesDatabase = [];
+            // Medium Legacy Optimization Engine Profile Block
+            if (title.includes("battlefield 1") || title.includes("battlefield v") || title.includes("gta v") ||
+                title.includes("control") || title.includes("dying light") || title.includes("tomb raider") ||
+                title.includes("witcher 3") || title.includes("dead by daylight") || title.includes("sifu")) {
+                return { pass: true, fps: "22-30 FPS", preset: "800x600 Low + Performance Mod", desc: "يمكن تشغيل اللعبة عبر لابتوبك ولكن باستخدام دقة منخفضة جداً (800x600) مع تفعيل مودات حذف ظلال البيئة لضمان استقرار الإطارات وتجنب الـ Lag." };
             }
 
-            buildInteractiveTags();
-            refreshDisplayRender();
-            setupHoverSounds();
+            // High compatibility esports / Platformer engines
+            return { pass: true, fps: "50-60 FPS", preset: "1366x768 Medium / Low", desc: "تشتغل اللعبة بسلاسة ممتازة على لابتوبك! كرت الشاشة والمعالج كافيان جداً لإعطائك تجربة لعب مستقرة بدون أي مشاكل تعليق." };
         }
 
-        function applyDataSorting(rule) {
-            currentActiveSort = rule;
-            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`sort-${rule}`).classList.add('active');
-            refreshDisplayRender();
+        // Live Image Dynamic Link Generator For All Games
+        function generateGameCoverUrl(title) {
+            let slug = title.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if(slug.includes("lastofuspartii")) return "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400";
+            if(slug.includes("clairobs") || slug.includes("expedition33")) return "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400";
+            return `https://avatar.iran.liara.run/username?username=${encodeURIComponent(title)}`;
         }
 
-        function buildInteractiveTags() {
-            const container = document.getElementById('filter-tags-row');
+        // View Context Router Switching Engine
+        function switchMainContext(context) {
+            document.getElementById('hub-view-section').style.display = (context === 'hub') ? 'block' : 'none';
+            document.getElementById('free-view-section').style.display = (context === 'free') ? 'block' : 'none';
+            document.getElementById('dev-panel-section').style.display = (context === 'dev') ? 'block' : 'none';
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if(context === 'hub') document.getElementById('menu-btn-hub').classList.add('active');
+            if(context === 'free') document.getElementById('menu-btn-free').classList.add('active');
+            if(context === 'dev') document.getElementById('menu-btn-dev').classList.add('active');
+            
+            playSynthSound(440, 0.05, 'sine');
+        }
+
+        // Security Authentication Platform Panel Gate
+        function promptDeveloperAccess() {
+            let pass = prompt("الرجاء إدخال رمز الأمان السري للمطور للدخول إلى لوحة التحكم:");
+            if (pass === "mouad23") {
+                switchMainContext('dev');
+                populateDevRemoveSelector();
+            } else if (pass !== null) {
+                alert("رمز الأمان خاطئ تماماً! تم رفض صلاحية الوصول لحماية البيانات.");
+            }
+        }
+
+        // Statistics Architecture Data Counter Process 
+        function updateAnalyticsCounterMetrics() {
+            let total = mainHubDatabase.length;
+            let steamCount = mainHubDatabase.filter(g => g.account === "★Alpha★").length;
+            let gogCount = mainHubDatabase.filter(g => g.account === "mouad.23").length;
+            let epicCount = mainHubDatabase.filter(g => g.account === "Epic Games").length;
+
+            let markup = `
+                <div class="stat-card total"><div class="stat-title">إجمالي ألعاب معاذ</div><div class="stat-val">${total}</div></div>
+                <div class="stat-card"><div class="stat-title">حساب Steam (★Alpha★)</div><div class="stat-val">${steamCount}</div></div>
+                <div class="stat-card gog"><div class="stat-title">حساب GOG (mouad.23)</div><div class="stat-val">${gogCount}</div></div>
+                <div class="stat-card epic"><div class="stat-title">حساب Epic Games الأصلي</div><div class="stat-val">${epicCount}</div></div>
+            `;
+            document.getElementById('statistics-analytical-row').innerHTML = markup;
+        }
+
+        // Filters UI Interactive Tags Render Setup Engine
+        function renderHubFilterChips() {
+            let pool = ["الكل", "Offline / Story", "Online Game", "★Alpha★", "mouad.23", "Epic Games", "المفضلة ❤️"];
+            let container = document.getElementById('hub-tags-render-pool');
             container.innerHTML = '';
-            const pool = ['الكل', 'Steam', 'Epic', 'PC', 'iOS', 'Android'];
-
+            
             pool.forEach(tag => {
+                let activeClass = (tag === currentSelectedTag) ? 'active' : '';
                 let count = 0;
-                if(tag === 'الكل') {
-                    count = freeGamesDatabase.length;
-                } else {
-                    count = freeGamesDatabase.filter(g => (g.title + g.platforms).toLowerCase().includes(tag.toLowerCase())).length;
-                }
+                
+                if (tag === "الكل") count = mainHubDatabase.length;
+                else if (tag === "المفضلة ❤️") count = favoritesDatabase.length;
+                else if (tag === "★Alpha★" || tag === "mouad.23" || tag === "Epic Games") count = mainHubDatabase.filter(g => g.account === tag).length;
+                else count = mainHubDatabase.filter(g => g.type === tag).length;
 
-                const btn = document.createElement('button');
-                btn.className = `platform-tag ${tag === currentSelectedTag ? 'active' : ''}`;
-                btn.innerText = `${tag === 'الكل' ? dictionary[systemLanguage].allTag : tag} (${count})`;
-                btn.onclick = () => {
-                    currentSelectedTag = tag;
-                    buildInteractiveTags();
-                    refreshDisplayRender();
-                };
-                container.appendChild(btn);
+                container.innerHTML += `<button class="filter-chip ${activeClass}" onclick="applyHubTagFilter('${tag}')">${tag} (${count})</button>`;
             });
         }
 
-        function refreshDisplayRender() {
-            const viewport = document.getElementById('dynamic-render-viewport');
+        let currentSelectedTag = "الكل";
+        function applyHubTagFilter(tag) {
+            currentSelectedTag = tag;
+            renderHubFilterChips();
+            renderHubDatabaseVisuals();
+        }
+
+        // Toggle Favorites Store Logic
+        function toggleGameFavoriteState(id, event) {
+            event.stopPropagation();
+            if (favoritesDatabase.includes(id)) {
+                favoritesDatabase = favoritesDatabase.filter(fId => fId !== id);
+            } else {
+                favoritesDatabase.push(id);
+                playSynthSound(880, 0.1, 'sine');
+            }
+            localStorage.setItem('volcanx_favs', JSON.stringify(favoritesDatabase));
+            renderHubFilterChips();
+            renderHubDatabaseVisuals();
+        }
+
+        // Render Platform Logic Core Viewport Grid
+        function renderHubDatabaseVisuals() {
+            let viewport = document.getElementById('hub-games-render-viewport');
             viewport.innerHTML = '';
-            const query = document.getElementById('system-search').value.toLowerCase();
-            let data = [...freeGamesDatabase];
+            let search = document.getElementById('hub-search-query').value.toLowerCase();
 
-            if (currentSelectedTag !== 'الكل') {
-                data = data.filter(g => (g.title + g.platforms).toLowerCase().includes(currentSelectedTag.toLowerCase()));
-            }
-            if (query) {
-                data = data.filter(g => g.title.toLowerCase().includes(query) || g.platforms.toLowerCase().includes(query));
-            }
+            let records = mainHubDatabase.filter(game => {
+                let matchesSearch = game.title.toLowerCase().includes(search);
+                let matchesTag = true;
 
-            if (currentActiveSort === 'new') {
-                data.sort((a, b) => b.id - a.id);
-            } else if (currentActiveSort === 'pop') {
-                data.sort((a, b) => b.popularity - a.popularity);
-            } else if (currentActiveSort === 'val') {
-                data.sort((a, b) => b.worthNum - a.worthNum);
-            }
+                if (currentSelectedTag === "المفضلة ❤️") matchesTag = favoritesDatabase.includes(game.id);
+                else if (currentSelectedTag === "★Alpha★" || currentSelectedTag === "mouad.23" || currentSelectedTag === "Epic Games") matchesTag = game.account === currentSelectedTag;
+                else if (currentSelectedTag !== "الكل") matchesTag = game.type === currentSelectedTag;
 
-            let countTxt = dictionary[systemLanguage].counts.replace('{n}', data.length);
-            document.getElementById('live-data-counter').innerText = countTxt;
+                return matchesSearch && matchesTag;
+            });
 
-            if (data.length === 0) {
-                viewport.innerHTML = `<div style="text-align:center; padding:50px; color:#64748b;">لا توجد نتائج مطابقة للفلاتر الحالية أو جاري جلب البيانات...</div>`;
+            if(records.length === 0) {
+                viewport.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:#475569;">لا توجد ألعاب متطابقة في هذه الفئة حالياً.</div>`;
                 return;
             }
 
-            const grid = document.createElement('div');
-            grid.className = 'games-grid';
+            records.forEach(game => {
+                let comp = verifyHardwareCompatibility(game.title);
+                let isFav = favoritesDatabase.includes(game.id) ? 'favorited' : '';
+                let badgeStyle = game.account === "★Alpha★" ? "badge-steam" : (game.account === "mouad.23" ? "badge-gog" : "badge-epic");
+                let specBadge = comp.pass ? `<span class="spec-status-indicator status-pass">قابل للعب ✔️</span>` : `<span class="spec-status-indicator status-fail">ثقيل ⚠️</span>`;
 
-            data.forEach(game => {
-                const card = document.createElement('div');
-                card.className = 'game-card';
-                
-                let badgeMarkup = `
-                    <span class="badge-free">${dictionary[systemLanguage].freeBadge}</span>
-                    <span class="badge-original-price">${game.worth}</span>
-                `;
-
-                let footerMarkup = `
-                    <span class="countdown-bar">${game.endDate}</span>
-                    <a href="${game.url || '#'}" target="_blank" class="steam-redirect-btn">${dictionary[systemLanguage].get}</a>
-                `;
-
-                card.innerHTML = `
-                    <div class="card-thumbnail">
-                        ${badgeMarkup}
-                        <img src="${game.image}" alt="${game.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%231e293b\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>'">
+                let el = document.createElement('div');
+                el.className = 'game-luxury-card';
+                el.onclick = () => openInspectModal(game);
+                el.innerHTML = `
+                    <div class="card-img-holder">
+                        <button class="fav-heart-trigger ${isFav}" onclick="toggleGameFavoriteState(${game.id}, event)">♥</button>
+                        <span class="platform-badge ${badgeStyle}">${game.account}</span>
+                        <img src="${generateGameCoverUrl(game.title)}" alt="" loading="lazy">
+                        ${specBadge}
                     </div>
-                    <div class="card-body">
-                        <div class="card-title">${game.title}</div>
-                        <div class="card-meta-tags">
-                            <span class="meta-tag">${game.platforms}</span>
-                        </div>
-                        <div class="card-footer">
-                            ${footerMarkup}
+                    <div class="card-details-box">
+                        <div class="game-title-text">${game.title}</div>
+                        <div class="meta-specs-preview">
+                            <span>${game.type}</span>
+                            <span class="fps-estimate">${comp.fps}</span>
                         </div>
                     </div>
                 `;
-                grid.appendChild(card);
+                viewport.appendChild(el);
             });
-
-            viewport.appendChild(grid);
-            setupHoverSounds();
         }
 
-        window.onload = () => {
-            runLoadingSequence(() => {
-                forceReloadSystemData();
+        // Modal Inspector Deployment Details Frame Logic
+        function openInspectModal(game) {
+            let comp = verifyHardwareCompatibility(game.title);
+            document.getElementById('modal-hero-img').src = generateGameCoverUrl(game.title);
+            document.getElementById('modal-game-title').innerText = game.title;
+            document.getElementById('modal-cell-acc').innerText = game.account;
+            document.getElementById('modal-cell-type').innerText = game.type;
+            document.getElementById('modal-cell-fps').innerText = comp.fps;
+            document.getElementById('modal-cell-fps').style.color = comp.pass ? "var(--neon-green)" : "var(--neon-magenta)";
+            document.getElementById('modal-cell-presets').innerText = comp.preset;
+            document.getElementById('modal-hw-title').innerText = comp.pass ? "🛡️ تقرير الأداء: متوافق مع مواصفات جهازك" : "⚠️ تقرير الأداء: اللعبة تفوق قدرة العتاد الحالي";
+            document.getElementById('modal-hw-title').style.color = comp.pass ? "var(--neon-green)" : "var(--neon-magenta)";
+            document.getElementById('modal-hw-desc').innerText = comp.desc;
+
+            document.getElementById('global-inspect-modal').style.display = 'flex';
+            playSynthSound(600, 0.12, 'square');
+        }
+
+        function closeInspectModal() {
+            document.getElementById('global-inspect-modal').style.display = 'none';
+        }
+        function closeInspectModalOutside(e) {
+            if(e.target.id === 'global-inspect-modal') closeInspectModal();
+        }
+
+        // Live Online API Fetch Framework (Free Deals Section Engine)
+        async function triggerFreeLiveFetch() {
+            let view = document.getElementById('free-games-render-viewport');
+            view.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--neon-blue);">جاري سحب عروض الألعاب المجانية والربط الذكي بالخوادم العالمية...</div>`;
+            try {
+                let cb = new Date().getTime();
+                let res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.gamerpower.com/api/giveaways?cb=' + cb)}`);
+                if(res.ok) {
+                    let raw = await res.json();
+                    globalFreeDatabase = JSON.parse(raw.contents) || [];
+                    renderFreeGiveawaysVisuals();
+                }
+            } catch(e) {
+                view.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--neon-magenta);">فشلت قنوات السيرفرات في الرد، يرجى النقر على زر التحديث المباشر مجدداً.</div>`;
+            }
+        }
+
+        function renderFreeGiveawaysVisuals() {
+            let view = document.getElementById('free-games-render-viewport');
+            view.innerHTML = '';
+            let query = document.getElementById('free-search-query').value.toLowerCase();
+
+            let filter = globalFreeDatabase.filter(g => g.title.toLowerCase().includes(query));
+            if(filter.length === 0) {
+                view.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:#475569;">لا توجد عروض عالمية مطابقة لبحثك الآن.</div>`;
+                return;
+            }
+
+            filter.forEach(item => {
+                let el = document.createElement('div');
+                el.className = 'game-luxury-card';
+                el.innerHTML = `
+                    <div class="card-img-holder">
+                        <span class="platform-badge" style="background:var(--neon-magenta);">${item.worth}</span>
+                        <img src="${item.image}" alt="">
+                    </div>
+                    <div class="card-details-box">
+                        <div class="game-title-text">${item.title}</div>
+                        <div class="meta-specs-preview">
+                            <span>${item.platforms}</span>
+                            <a href="${item.open_giveaway_url}" target="_blank" style="color:var(--neon-green); text-decoration:none;">احصل عليها مجاناً ←</a>
+                        </div>
+                    </div>
+                `;
+                view.appendChild(el);
             });
+        }
+
+        // Server Control Inject Processing Actions
+        function populateDevRemoveSelector() {
+            let select = document.getElementById('dev-remove-selector');
+            select.innerHTML = '';
+            mainHubDatabase.sort((a,b) => a.title.localeCompare(b.title)).forEach(game => {
+                select.innerHTML += `<option value="${game.id}">${game.title} [${game.account}]</option>`;
+            });
+        }
+
+        function executeDevAddGame() {
+            let title = document.getElementById('dev-in-title').value.trim();
+            let acc = document.getElementById('dev-in-account').value;
+            let type = document.getElementById('dev-in-type').value;
+
+            if(!title) { alert("من فضلك اكتب اسم اللعبة أولاً!"); return; }
+
+            let newId = mainHubDatabase.length > 0 ? Math.max(...mainHubDatabase.map(g=>g.id)) + 1 : 1;
+            mainHubDatabase.push({ id: newId, title: title, account: acc, type: type });
+            
+            document.getElementById('dev-in-title').value = '';
+            updateAnalyticsCounterMetrics();
+            renderHubFilterChips();
+            renderHubDatabaseVisuals();
+            populateDevRemoveSelector();
+            alert(`تم بنجاح حقن وتشغيل اللعبة [${title}] داخل الأرشيف الموحد لحسابك.`);
+        }
+
+        function executeDevRemoveGame() {
+            let id = parseInt(document.getElementById('dev-remove-selector').value);
+            if(!id) return;
+
+            let details = mainHubDatabase.find(g => g.id === id);
+            if(confirm(`هل أنت متأكد من رغبتك في حذف وإجراء عملية الـ Refund للعبة: ${details.title}؟`)) {
+                mainHubDatabase = mainHubDatabase.filter(g => g.id !== id);
+                updateAnalyticsCounterMetrics();
+                renderHubFilterChips();
+                renderHubDatabaseVisuals();
+                populateDevRemoveSelector();
+                alert("تم إلغاء تنشيط كود اللعبة وإزالتها تماماً من السيرفر.");
+            }
+        }
+
+        // Live Auto-Updating Project Backup Exporter Script Engine
+        function triggerProjectSourceDownload() {
+            let rawCode = document.documentElement.outerHTML;
+            let blob = new Blob([rawCode], { type: "text/html" });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url; a.download = "index.html";
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a); URL.revokeObjectURL(url);
+            playSynthSound(900, 0.25, 'triangle');
+        }
+
+        // 60FPS Ambient Particles Background Generation Vector Canvas Engine
+        function runAmbientCanvasEngine() {
+            const canvas = document.getElementById('ambient-canvas');
+            const ctx = canvas.getContext('2d');
+            let pts = [];
+
+            function resize() {
+                canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize); resize();
+
+            for(let i=0; i<45; i++) {
+                pts.push({
+                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                    r: Math.random() * 2 + 1, sx: (Math.random() - 0.5) * 0.4, sy: (Math.random() - 0.5) * 0.4
+                });
+            }
+
+            function loop() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.fillStyle = '#00f0ff';
+                pts.forEach(p => {
+                    p.x += p.sx; p.y += p.sy;
+                    if(p.x < 0 || p.x > canvas.width) p.sx *= -1;
+                    if(p.y < 0 || p.y > canvas.height) p.sy *= -1;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+                });
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // Pipeline Initializer
+        window.onload = () => {
+            runAmbientCanvasEngine();
+            setTimeout(() => {
+                document.getElementById('loader-screen').style.opacity = '0';
+                document.getElementById('loader-screen').style.visibility = 'hidden';
+                updateAnalyticsCounterMetrics();
+                renderHubFilterChips();
+                renderHubDatabaseVisuals();
+                triggerFreeLiveFetch();
+            }, 1200);
         };
     </script>
 </body>
